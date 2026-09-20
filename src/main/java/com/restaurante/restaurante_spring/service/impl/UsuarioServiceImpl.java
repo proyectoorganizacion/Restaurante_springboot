@@ -1,0 +1,106 @@
+package com.restaurante.restaurante_spring.service.impl;
+
+import com.restaurante.restaurante_spring.dto.request.UsuarioRegisterRequest;
+import com.restaurante.restaurante_spring.dto.response.UsuarioRegisterResponse;
+import com.restaurante.restaurante_spring.entity.Rol;
+import com.restaurante.restaurante_spring.entity.Usuario;
+import com.restaurante.restaurante_spring.repository.RolRepository;
+import com.restaurante.restaurante_spring.repository.UsuarioRepository;
+import com.restaurante.restaurante_spring.service.UsuarioService;
+
+import lombok.RequiredArgsConstructor;
+
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.stereotype.Service;
+
+import java.time.LocalDate;
+import java.time.Period;
+
+@Service
+@RequiredArgsConstructor
+public class UsuarioServiceImpl implements UsuarioService {
+    private final UsuarioRepository usuarioRepository;
+    private final RolRepository rolRepository;
+
+    private final BCryptPasswordEncoder passwordEncoder =
+            new BCryptPasswordEncoder();
+
+    @Override
+    public UsuarioRegisterResponse registrarUsuario(
+            UsuarioRegisterRequest request) {
+
+        validarEdad(request.getFechaNacimiento());
+
+        if (usuarioRepository.existsByIdentification(
+                request.getDocumentoDeIdentidad())) {
+
+            throw new RuntimeException(
+                    "El documento ya está registrado");
+        }
+
+        if (usuarioRepository.existsByEmail(
+                request.getCorreo())) {
+
+            throw new RuntimeException(
+                    "El correo ya está registrado");
+        }
+
+        Rol rolPropietario = rolRepository
+                .findByNombre("PROPIETARIO")
+                .orElseThrow(() -> new RuntimeException(
+                        "El rol PROPIETARIO no existe"));
+
+        String passwordEncriptada =
+                passwordEncoder.encode(request.getClave());
+
+        Usuario usuario = Usuario.builder()
+                .name(request.getNombre())
+                .lastname(request.getApellido())
+                .identification(request.getDocumentoDeIdentidad())
+                .phone(request.getCelular())
+                .birthdate(request.getFechaNacimiento())
+                .email(request.getCorreo())
+                .password(passwordEncriptada)
+                .rol(rolPropietario)
+                .build();
+
+        Usuario usuarioGuardado =
+                usuarioRepository.save(usuario);
+
+        return UsuarioRegisterResponse.builder()
+                .id(usuarioGuardado.getId())
+                .nombre(usuarioGuardado.getName())
+                .apellido(usuarioGuardado.getLastname())
+                .documentoDeIdentidad(
+                        usuarioGuardado.getIdentification())
+                .celular(usuarioGuardado.getPhone())
+                .correo(usuarioGuardado.getEmail())
+                .rol(usuarioGuardado.getRol().getNombre())
+                .mensaje("Usuario registrado correctamente")
+                .build();
+    }
+
+    private void validarEdad(LocalDate fechaNacimiento) {
+
+        if (fechaNacimiento == null) {
+            throw new RuntimeException(
+                    "La fecha de nacimiento es obligatoria");
+        }
+
+        if (fechaNacimiento.isAfter(LocalDate.now())) {
+            throw new RuntimeException(
+                    "La fecha de nacimiento no puede ser futura");
+        }
+
+        int edad = Period.between(
+                fechaNacimiento,
+                LocalDate.now()
+        ).getYears();
+
+        if (edad < 18) {
+            throw new RuntimeException(
+                    "El usuario debe ser mayor de edad");
+        }
+    }
+
+}
