@@ -54,5 +54,4 @@ CREATE TABLE IF NOT EXISTS plato (
 
     select * from rol;
 SELECT * FROM usuario;
-drop DATABASE restaurante_db;
   
