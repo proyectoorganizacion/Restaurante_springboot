@@ -21,7 +21,7 @@ public class RestauranteServiceImpl implements RestauranteService {
     @Override
     public void crearRestaurante(RestauranteRegisterRequest request) {
         // 1. Validar que el usuario exista
-        Usuario propietario = usuarioRepository.findById(request.getIdPropietario())
+        Usuario propietario = usuarioRepository.findById(request.getId_propietario())
                 .orElseThrow(() -> new IllegalArgumentException("El usuario especificado no existe."));
 
         // 2. Validar que el usuario tenga el rol de PROPIETARIO
@@ -40,8 +40,8 @@ public class RestauranteServiceImpl implements RestauranteService {
         restaurante.setNit(request.getNit());
         restaurante.setDireccion(request.getDireccion());
         restaurante.setTelefono(request.getTelefono());
-        restaurante.setUrlLogo(request.getUrlLogo());
-        restaurante.setIdPropietario(request.getIdPropietario());
+        restaurante.setUrl_logo(request.getUrl_logo());
+        restaurante.setId_propietario(request.getId_propietario());
 
         restauranteRepository.save(restaurante);
     }

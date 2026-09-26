@@ -29,16 +29,16 @@ public class UsuarioServiceImpl implements UsuarioService {
     public UsuarioRegisterResponse registrarUsuario(
             UsuarioRegisterRequest request) {
 
-        validarEdad(request.getFechaNacimiento());
+        validarEdad(request.getFecha_nacimiento());
 
-        if (usuarioRepository.existsByIdentification(
-                request.getDocumentoDeIdentidad())) {
+        if (usuarioRepository.existsByDocIdentidad(
+                request.getDocIdentidad())) {
 
             throw new RuntimeException(
                     "El documento ya está registrado");
         }
 
-        if (usuarioRepository.existsByEmail(
+        if (usuarioRepository.existsByCorreo(
                 request.getCorreo())) {
 
             throw new RuntimeException(
@@ -51,15 +51,15 @@ public class UsuarioServiceImpl implements UsuarioService {
                         "El rol PROPIETARIO no existe"));
 
         String passwordEncriptada =
-                passwordEncoder.encode(request.getClave());
+                passwordEncoder.encode(request.getPassword());
 
         Usuario usuario = Usuario.builder()
-                .name(request.getNombre())
-                .lastname(request.getApellido())
-                .identification(request.getDocumentoDeIdentidad())
-                .phone(request.getCelular())
-                .birthdate(request.getFechaNacimiento())
-                .email(request.getCorreo())
+                .nombre(request.getNombre())
+                .apellido(request.getApellido())
+                .docIdentidad(request.getDocIdentidad())
+                .celular(request.getCelular())
+                .fecha_nacimiento(request.getFecha_nacimiento())
+                .correo(request.getCorreo())
                 .password(passwordEncriptada)
                 .rol(rolPropietario)
                 .build();
@@ -69,12 +69,12 @@ public class UsuarioServiceImpl implements UsuarioService {
 
         return UsuarioRegisterResponse.builder()
                 .id(usuarioGuardado.getId())
-                .nombre(usuarioGuardado.getName())
-                .apellido(usuarioGuardado.getLastname())
-                .documentoDeIdentidad(
-                        usuarioGuardado.getIdentification())
-                .celular(usuarioGuardado.getPhone())
-                .correo(usuarioGuardado.getEmail())
+                .nombre(usuarioGuardado.getNombre())
+                .apellido(usuarioGuardado.getApellido())
+                .docIdentidad(
+                        usuarioGuardado.getDocIdentidad())
+                .celular(usuarioGuardado.getCelular())
+                .correo(usuarioGuardado.getCorreo())
                 .rol(usuarioGuardado.getRol().getNombre())
                 .mensaje("Usuario registrado correctamente")
                 .build();

@@ -29,8 +29,8 @@ public class RestauranteRegisterRequest {
     private String telefono;
 
     @NotBlank(message = "La URL del logo es obligatoria")
-    private String urlLogo;
+    private String url_logo;
 
     @NotNull(message = "El ID del propietario es obligatorio")
-    private Integer idPropietario;
+    private Integer id_propietario;
 }

@@ -1,36 +1,37 @@
 package com.restaurante.restaurante_spring.entity;
 
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 @Entity
 @Table(name = "restaurante")
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
+@Getter
+@Setter
+@Builder
 public class Restaurante {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    private Integer id;
 
-    @Column(nullable = false)
+    @Column(name = "nombre", nullable = false, length = 100)
     private String nombre;
 
-    @Column(nullable = false, unique = true)
+    @Column(name = "nit", nullable = false, unique = true, length = 20)
     private String nit;
 
-    @Column(nullable = false)
+    @Column(name = "direccion", nullable = false, length = 100)
     private String direccion;
 
-    @Column(nullable = false)
+    @Column(name = "telefono", nullable = false, length = 13)
     private String telefono;
 
-    @Column(name = "url_logo", nullable = false)
-    private String urlLogo;
+    @Column(name = "url_logo", nullable = false, length = 255)
+    private String url_logo;
 
     @Column(name = "id_propietario", nullable = false)
-    private Integer idPropietario;
+    private Integer id_propietario;
 }

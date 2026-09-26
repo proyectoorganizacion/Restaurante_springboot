@@ -15,7 +15,7 @@ public class UsuarioRegisterResponse {
 
     private String apellido;
 
-    private String documentoDeIdentidad;
+    private String docIdentidad;
 
     private String celular;
 

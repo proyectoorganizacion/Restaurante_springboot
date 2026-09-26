@@ -14,18 +14,18 @@ INSERT IGNORE INTO rol (id, nombre) VALUES
 (4, 'CLIENTE');
 
 -- 2. Tabla USUARIO
-CREATE TABLE IF NOT EXISTS usuario (
-                                        id INT AUTO_INCREMENT PRIMARY KEY,
-                                       nombre VARCHAR(100) NOT NULL,
+CREATE TABLE usuario (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    nombre VARCHAR(100) NOT NULL,
     apellido VARCHAR(100) NOT NULL,
-    doc_identidad VARCHAR(20) NOT NULL UNIQUE,
+    docIdentidad VARCHAR(20) NOT NULL UNIQUE, -- Campo limpio
     celular VARCHAR(13),
     fecha_nacimiento DATE NOT NULL,
     correo VARCHAR(100) NOT NULL UNIQUE,
     password VARCHAR(255) NOT NULL,
     id_rol INT NOT NULL,
     CONSTRAINT fk_usuario_rol FOREIGN KEY (id_rol) REFERENCES rol(id)
-    );
+);
 
 -- 3. Tabla RESTAURANTE
 CREATE TABLE IF NOT EXISTS restaurante (
@@ -52,6 +52,9 @@ CREATE TABLE IF NOT EXISTS plato (
     CONSTRAINT fk_plato_restaurante FOREIGN KEY (id_restaurante) REFERENCES restaurante(id)
     );
 
-    select * from rol;
+select * from rol;
 SELECT * FROM usuario;
+SELECT * FROM restaurante;
+
+
   
