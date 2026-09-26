@@ -25,7 +25,7 @@ public class UsuarioRegisterRequest {
             regexp = "\\d+",
             message = "El documento debe contener únicamente números"
     )
-    private String documentoDeIdentidad;
+    private String docIdentidad;
 
     @NotBlank(message = "El celular es obligatorio")
     @Size(
@@ -39,18 +39,18 @@ public class UsuarioRegisterRequest {
     private String celular;
 
     @NotNull(message = "La fecha de nacimiento es obligatoria")
-    private LocalDate fechaNacimiento;
+    private LocalDate fecha_nacimiento;
 
     @AssertTrue(message = "El usuario debe ser mayor de 18 años")
     public boolean esMayorDeEdad() {
 
-        if (fechaNacimiento == null ||
-                fechaNacimiento.isAfter(LocalDate.now())) {
+        if (fecha_nacimiento == null ||
+                fecha_nacimiento.isAfter(LocalDate.now())) {
             return true;
         }
 
         return Period.between(
-                fechaNacimiento,
+                fecha_nacimiento,
                 LocalDate.now()
         ).getYears() >= 18;
     }
@@ -58,11 +58,11 @@ public class UsuarioRegisterRequest {
     @AssertTrue(message = "La fecha de nacimiento no puede ser en el futuro")
     public boolean fechaNoEsFutura() {
 
-        if (fechaNacimiento == null) {
+        if (fecha_nacimiento == null) {
             return true;
         }
 
-        return !fechaNacimiento.isAfter(LocalDate.now());
+        return !fecha_nacimiento.isAfter(LocalDate.now());
     }
 
     @NotBlank(message = "El correo es obligatorio")
@@ -70,5 +70,5 @@ public class UsuarioRegisterRequest {
     private String correo;
 
     @NotBlank(message = "La clave es obligatoria")
-    private String clave;
+    private String password ;
 }

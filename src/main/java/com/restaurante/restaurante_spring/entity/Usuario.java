@@ -19,22 +19,22 @@ public class Usuario {
     private Integer id;
 
     @Column(name = "nombre", nullable = false, length = 100)
-    private String name;
+    private String nombre;
 
     @Column(name = "apellido", nullable = false, length = 100)
-    private String lastname;
+    private String apellido;
 
-    @Column(name = "doc_identidad", nullable = false, unique = true, length = 20)
-    private String identification;
+    @Column(name = "docIdentidad", nullable = false, unique = true, length = 20)
+    private String docIdentidad;
 
     @Column(name = "celular", nullable = false, length = 13)
-    private String phone;
+    private String celular;
 
     @Column(name = "fecha_nacimiento", nullable = false)
-    private LocalDate birthdate;
+    private LocalDate fecha_nacimiento;
 
     @Column(name = "correo", nullable = false, unique = true, length = 100)
-    private String email;
+    private String correo;
 
     @Column(name = "password", nullable = false, length = 255)
     private String password;
