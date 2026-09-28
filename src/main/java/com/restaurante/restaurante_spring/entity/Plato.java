@@ -30,7 +30,7 @@ public class Plato {
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
-    private CategoriaPlato categoria;
+    private CategoriaPlatoEntity categoria;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "id_restaurante", nullable = false)
