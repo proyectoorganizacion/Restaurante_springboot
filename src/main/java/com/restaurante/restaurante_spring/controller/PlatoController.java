@@ -1,5 +1,6 @@
 package com.restaurante.restaurante_spring.controller;
 
+import com.restaurante.restaurante_spring.dto.request.PlatoEstadoRequest;
 import com.restaurante.restaurante_spring.dto.request.PlatoRequest;
 import com.restaurante.restaurante_spring.dto.request.PlatoUpdateRequest;
 import com.restaurante.restaurante_spring.dto.response.PlatoResponse;
@@ -31,5 +32,12 @@ public class PlatoController {
         PlatoResponse platoActualizado = platoService.modificarPlato(id, request, correoUsuario);
         return ResponseEntity.ok(platoActualizado);
     }
-}
 
+    @PatchMapping("/{id}/estado")
+    public ResponseEntity cambiarEstadoPlato(@PathVariable Long id,
+                                             @Valid @RequestBody PlatoEstadoRequest request,
+                                             @RequestParam String correoUsuario) {
+        PlatoResponse response = platoService.cambiarEstadoPlato(id, request, correoUsuario);
+        return ResponseEntity.ok(response);
+    }
+}
