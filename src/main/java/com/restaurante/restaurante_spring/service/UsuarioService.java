@@ -1,5 +1,6 @@
 package com.restaurante.restaurante_spring.service;
 
+import com.restaurante.restaurante_spring.dto.request.ClienteRegisterRequest;
 import com.restaurante.restaurante_spring.dto.request.UsuarioRegisterRequest;
 import com.restaurante.restaurante_spring.dto.response.UsuarioRegisterResponse;
 import com.restaurante.restaurante_spring.dto.request.EmpleadoRegisterRequest;
@@ -11,4 +12,8 @@ public interface UsuarioService {
 
     UsuarioRegisterResponse registrarEmpleado(
             EmpleadoRegisterRequest request);
+
+    UsuarioRegisterResponse registrarCliente(
+            ClienteRegisterRequest request
+    );
 }
