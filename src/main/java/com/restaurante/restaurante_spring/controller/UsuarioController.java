@@ -1,5 +1,6 @@
 package com.restaurante.restaurante_spring.controller;
 
+import com.restaurante.restaurante_spring.dto.request.EmpleadoRegisterRequest;
 import com.restaurante.restaurante_spring.dto.request.UsuarioRegisterRequest;
 import com.restaurante.restaurante_spring.dto.response.UsuarioRegisterResponse;
 import com.restaurante.restaurante_spring.service.UsuarioService;
@@ -31,7 +32,7 @@ public class UsuarioController {
     }
     @PostMapping("/empleado")
     public ResponseEntity<UsuarioRegisterResponse> registrarEmpleado(
-            @Valid @RequestBody UsuarioRegisterRequest request) {
+            @Valid @RequestBody EmpleadoRegisterRequest request) {
 
         UsuarioRegisterResponse response =
                 usuarioService.registrarEmpleado(request);
