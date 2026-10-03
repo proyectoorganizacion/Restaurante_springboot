@@ -17,6 +17,9 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 
 @Service
 @RequiredArgsConstructor
@@ -195,6 +198,29 @@ public class PlatoServiceImpl implements PlatoService {
                 .categoria(platoActualizado.getCategoria())
                 .mensaje("Estado del plato actualizado correctamente")
                 .build();
+    }
+    @Override
+    public Page<PlatoResponse> listarPlatosPorRestaurante(Integer idRestaurante, Integer idCategoria, int pagina, int tamaño) {
+        Pageable pageable = PageRequest.of(pagina, tamaño);
+        Page<Plato> platos;
+
+        // Validamos si enviaron categoría para decidir qué consulta usar
+        if (idCategoria == null) {
+            platos = platoRepository.findByRestauranteId(idRestaurante, pageable);
+        } else {
+            platos = platoRepository.findByRestauranteIdAndCategoriaId(idRestaurante, idCategoria, pageable);
+        }
+
+        // Convertimos la entidad Plato al DTO PlatoResponse usando tu @Builder
+        return platos.map(plato -> PlatoResponse.builder()
+                .nombre(plato.getNombre())
+                .descripcion(plato.getDescripcion())
+                .precio(plato.getPrecio())
+                .urlImagen(plato.getUrlImagen())
+                .estado(plato.getEstado())
+                .categoria(plato.getCategoria())
+                .build()
+        );
     }
 
 }
