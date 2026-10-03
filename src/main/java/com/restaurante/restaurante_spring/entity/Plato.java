@@ -21,8 +21,12 @@ public class Plato {
     private Double precio;
     private String descripcion;
     private String urlImagen;
+    @Column(name = "activo", nullable = false)
     private Boolean estado;
     @ManyToOne(fetch=FetchType.LAZY)
-    @JoinColumn(name="categoria", nullable=false)
+    @JoinColumn(name = "id_categoria", nullable = false)
     private Categoria categoria;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "id_restaurante", nullable = false)
+    private Restaurante restaurante;
 }

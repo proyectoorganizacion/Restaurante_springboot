@@ -29,4 +29,15 @@ public class UsuarioController {
                 .status(HttpStatus.CREATED)
                 .body(response);
     }
+    @PostMapping("/empleado")
+    public ResponseEntity<UsuarioRegisterResponse> registrarEmpleado(
+            @Valid @RequestBody UsuarioRegisterRequest request) {
+
+        UsuarioRegisterResponse response =
+                usuarioService.registrarEmpleado(request);
+
+        return ResponseEntity
+                .status(HttpStatus.CREATED)
+                .body(response);
+    }
 }

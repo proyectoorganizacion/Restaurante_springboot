@@ -80,6 +80,61 @@ public class UsuarioServiceImpl implements UsuarioService {
                 .build();
     }
 
+    @Override
+    public UsuarioRegisterResponse registrarEmpleado(
+            UsuarioRegisterRequest request) {
+
+        validarEdad(request.getFecha_nacimiento());
+
+        if (usuarioRepository.existsByDocIdentidad(
+                request.getDocIdentidad())) {
+
+            throw new RuntimeException(
+                    "El documento ya está registrado");
+        }
+
+        if (usuarioRepository.existsByCorreo(
+                request.getCorreo())) {
+
+            throw new RuntimeException(
+                    "El correo ya está registrado");
+        }
+
+        Rol rolEmpleado = rolRepository
+                .findByNombre("EMPLEADO")
+                .orElseThrow(() -> new RuntimeException(
+                        "El rol EMPLEADO no existe"));
+
+        String passwordEncriptada =
+                passwordEncoder.encode(request.getPassword());
+
+        Usuario usuario = Usuario.builder()
+                .nombre(request.getNombre())
+                .apellido(request.getApellido())
+                .docIdentidad(request.getDocIdentidad())
+                .celular(request.getCelular())
+                .fecha_nacimiento(request.getFecha_nacimiento())
+                .correo(request.getCorreo())
+                .password(passwordEncriptada)
+                .rol(rolEmpleado)
+                .build();
+
+        Usuario usuarioGuardado =
+                usuarioRepository.save(usuario);
+
+        return UsuarioRegisterResponse.builder()
+                .id(usuarioGuardado.getId())
+                .nombre(usuarioGuardado.getNombre())
+                .apellido(usuarioGuardado.getApellido())
+                .docIdentidad(
+                        usuarioGuardado.getDocIdentidad())
+                .celular(usuarioGuardado.getCelular())
+                .correo(usuarioGuardado.getCorreo())
+                .rol(usuarioGuardado.getRol().getNombre())
+                .mensaje("Empleado registrado correctamente")
+                .build();
+    }
+
     private void validarEdad(LocalDate fechaNacimiento) {
 
         if (fechaNacimiento == null) {

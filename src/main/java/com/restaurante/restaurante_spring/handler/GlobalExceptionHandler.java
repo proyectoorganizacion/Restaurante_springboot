@@ -1,4 +1,4 @@
-package com.restaurante.restaurante_spring.controller;
+package com.restaurante.restaurante_spring.handler;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;

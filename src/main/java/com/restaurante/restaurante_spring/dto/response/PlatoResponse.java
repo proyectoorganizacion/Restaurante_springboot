@@ -1,6 +1,5 @@
 package com.restaurante.restaurante_spring.dto.response;
 
-
 import com.restaurante.restaurante_spring.entity.Categoria;
 import lombok.Builder;
 import lombok.Getter;
@@ -16,4 +15,5 @@ public class PlatoResponse {
     private String urlImagen;
     private Boolean estado;
     private Categoria categoria;
+    private String mensaje;
 }

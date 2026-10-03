@@ -6,6 +6,7 @@ import com.restaurante.restaurante_spring.entity.Usuario;
 import com.restaurante.restaurante_spring.repository.RestauranteRepository;
 import com.restaurante.restaurante_spring.repository.UsuarioRepository;
 import com.restaurante.restaurante_spring.service.RestauranteService;
+import org.jspecify.annotations.NonNull;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -19,7 +20,7 @@ public class RestauranteServiceImpl implements RestauranteService {
     private UsuarioRepository usuarioRepository;
 
     @Override
-    public void crearRestaurante(RestauranteRegisterRequest request) {
+    public void crearRestaurante(@NonNull RestauranteRegisterRequest request) {
         // 1. Validar que el usuario exista
         Usuario propietario = usuarioRepository.findById(request.getId_propietario())
                 .orElseThrow(() -> new IllegalArgumentException("El usuario especificado no existe."));

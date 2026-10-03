@@ -5,6 +5,6 @@ import com.restaurante.restaurante_spring.entity.Plato;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 public interface PlatoRepository extends JpaRepository<Plato, Integer> {
-    PlatoResponse registrarPlato(PlatoResponse platoResponse);
+   // PlatoResponse registrarPlato(PlatoResponse platoResponse);
 
 }
