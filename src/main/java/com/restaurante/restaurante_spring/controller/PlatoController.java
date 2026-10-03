@@ -6,10 +6,12 @@ import com.restaurante.restaurante_spring.dto.request.PlatoRequest;
 import com.restaurante.restaurante_spring.dto.response.PlatoResponse;
 import com.restaurante.restaurante_spring.service.PlatoService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import jakarta.validation.Valid;
+
 
 @RestController
 @RequestMapping("/api/v1/platos")
@@ -42,5 +44,17 @@ public class PlatoController {
         return ResponseEntity.ok(
                 platoService.cambiarEstadoPlato(idPlato, request)
         );
+    }
+
+    // <--- MÉTODO NUEVO PARA LA HU-10 --->
+    @GetMapping("/restaurante/{idRestaurante}")
+    public ResponseEntity<Page<PlatoResponse>> listarPlatosPorRestaurante(
+            @PathVariable Integer idRestaurante,
+            @RequestParam(required = false) Integer idCategoria,
+            @RequestParam(defaultValue = "0") int pagina,
+            @RequestParam(defaultValue = "10") int tamaño) {
+
+        Page<PlatoResponse> respuesta = platoService.listarPlatosPorRestaurante(idRestaurante, idCategoria, pagina, tamaño);
+        return ResponseEntity.ok(respuesta);
     }
 }
