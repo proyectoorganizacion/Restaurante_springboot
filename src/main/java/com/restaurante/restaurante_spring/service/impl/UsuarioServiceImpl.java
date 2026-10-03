@@ -1,5 +1,6 @@
 package com.restaurante.restaurante_spring.service.impl;
 
+import com.restaurante.restaurante_spring.dto.request.ClienteRegisterRequest;
 import com.restaurante.restaurante_spring.dto.request.EmpleadoRegisterRequest;
 import com.restaurante.restaurante_spring.dto.request.UsuarioRegisterRequest;
 import com.restaurante.restaurante_spring.dto.response.UsuarioRegisterResponse;
@@ -196,6 +197,64 @@ public class UsuarioServiceImpl implements UsuarioService {
                 .correo(empleadoGuardado.getCorreo())
                 .rol(empleadoGuardado.getRol().getNombre())
                 .mensaje("Empleado registrado correctamente")
+                .build();
+    }
+
+    @Override
+    public UsuarioRegisterResponse registrarCliente(
+            ClienteRegisterRequest request) {
+
+        Rol rolCliente = rolRepository.findById(4)
+                .orElseThrow(() ->
+                        new RuntimeException(
+                                "El rol CLIENTE no existe"));
+
+        if (!"CLIENTE".equalsIgnoreCase(
+                rolCliente.getNombre())) {
+
+            throw new RuntimeException(
+                    "El rol encontrado no corresponde a CLIENTE");
+        }
+
+        if (usuarioRepository.existsByDocIdentidad(
+                request.getDocIdentidad())) {
+
+            throw new RuntimeException(
+                    "El documento ya está registrado");
+        }
+
+        if (usuarioRepository.existsByCorreo(
+                request.getCorreo())) {
+
+            throw new RuntimeException(
+                    "El correo ya está registrado");
+        }
+
+        String passwordEncriptada =
+                passwordEncoder.encode(request.getPassword());
+
+        Usuario cliente = Usuario.builder()
+                .nombre(request.getNombre())
+                .apellido(request.getApellido())
+                .docIdentidad(request.getDocIdentidad())
+                .celular(request.getCelular())
+                .correo(request.getCorreo())
+                .password(passwordEncriptada)
+                .rol(rolCliente)
+                .build();
+
+        Usuario clienteGuardado =
+                usuarioRepository.save(cliente);
+
+        return UsuarioRegisterResponse.builder()
+                .id(clienteGuardado.getId())
+                .nombre(clienteGuardado.getNombre())
+                .apellido(clienteGuardado.getApellido())
+                .docIdentidad(clienteGuardado.getDocIdentidad())
+                .celular(clienteGuardado.getCelular())
+                .correo(clienteGuardado.getCorreo())
+                .rol(clienteGuardado.getRol().getNombre())
+                .mensaje("Cliente registrado correctamente")
                 .build();
     }
 

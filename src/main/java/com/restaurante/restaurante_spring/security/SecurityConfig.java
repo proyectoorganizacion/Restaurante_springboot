@@ -33,6 +33,9 @@ public class SecurityConfig {
                         .requestMatchers("/api/v1/auth/**")
                         .permitAll()
 
+                        .requestMatchers("/api/v1/usuarios/cliente")
+                        .permitAll()
+
                         .requestMatchers("/api/v1/usuarios/registro")
                         .hasRole("ADMINISTRADOR")
 
