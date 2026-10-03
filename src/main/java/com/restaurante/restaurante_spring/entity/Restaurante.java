@@ -26,10 +26,10 @@ public class Restaurante {
     @Column(name = "direccion", nullable = false, length = 100)
     private String direccion;
 
-    @Column(name = "telefono", nullable = false, length = 13)
+    @Column(name = "telefono", length = 13)
     private String telefono;
 
-    @Column(name = "url_logo", nullable = false, length = 255)
+    @Column(name = "url_logo", length = 255)
     private String url_logo;
 
     @Column(name = "id_propietario", nullable = false)

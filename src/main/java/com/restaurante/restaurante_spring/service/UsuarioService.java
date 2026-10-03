@@ -7,4 +7,7 @@ public interface UsuarioService {
     UsuarioRegisterResponse registrarUsuario(
             UsuarioRegisterRequest request
     );
+
+    UsuarioRegisterResponse registrarEmpleado(
+            UsuarioRegisterRequest request);
 }
