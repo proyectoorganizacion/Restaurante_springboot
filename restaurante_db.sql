@@ -25,7 +25,7 @@ CREATE TABLE usuario (
     apellido VARCHAR(100) NOT NULL,
     docIdentidad VARCHAR(20) NOT NULL UNIQUE,
     celular VARCHAR(13),
-    fecha_nacimiento DATE NOT NULL,
+    fecha_nacimiento DATE NULL,
     correo VARCHAR(100) NOT NULL UNIQUE,
     password VARCHAR(255) NOT NULL,
     id_rol INT NOT NULL,
@@ -131,3 +131,5 @@ SELECT * FROM usuario;
 SELECT * FROM restaurante;
 SELECT * FROM categoria;
 SELECT * FROM plato;
+SELECT * FROM empleado_restaurante;
+
