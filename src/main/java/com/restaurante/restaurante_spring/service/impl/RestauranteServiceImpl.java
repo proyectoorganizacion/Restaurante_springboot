@@ -1,6 +1,7 @@
 package com.restaurante.restaurante_spring.service.impl;
 
 import com.restaurante.restaurante_spring.dto.request.RestauranteRegisterRequest;
+import com.restaurante.restaurante_spring.dto.response.RestauranteListResponse;
 import com.restaurante.restaurante_spring.entity.Restaurante;
 import com.restaurante.restaurante_spring.entity.Usuario;
 import com.restaurante.restaurante_spring.repository.RestauranteRepository;
@@ -8,6 +9,9 @@ import com.restaurante.restaurante_spring.repository.UsuarioRepository;
 import com.restaurante.restaurante_spring.service.RestauranteService;
 import org.jspecify.annotations.NonNull;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -45,5 +49,17 @@ public class RestauranteServiceImpl implements RestauranteService {
         restaurante.setId_propietario(request.getId_propietario());
 
         restauranteRepository.save(restaurante);
+    } // <--- LO QUE SE ARREGLÓ: Faltaba esta llave de cierre.
+
+    // El nuevo método para la HU-9 --->
+    @Override
+    public Page<RestauranteListResponse> listarRestaurantesPaginados(int pagina, int tamaño) {
+        Pageable pageable = PageRequest.of(pagina, tamaño);
+        Page<Restaurante> restaurantes = restauranteRepository.findAllByOrderByNombreAsc(pageable);
+
+        return restaurantes.map(restaurante -> new RestauranteListResponse(
+                restaurante.getNombre(),
+                restaurante.getUrl_logo()
+        ));
     }
 }
