@@ -48,6 +48,9 @@ public class SecurityConfig {
                         .requestMatchers("/api/v1/platos/{idPlato}")
                         .hasRole("PROPIETARIO")
 
+                        .requestMatchers("/api/v1/platos/{idPlato}/estado")
+                        .hasRole("PROPIETARIO")
+
                         .anyRequest()
                         .authenticated()
                 )

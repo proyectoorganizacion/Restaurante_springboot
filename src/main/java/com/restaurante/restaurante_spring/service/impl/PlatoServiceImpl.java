@@ -1,5 +1,6 @@
 package com.restaurante.restaurante_spring.service.impl;
 
+import com.restaurante.restaurante_spring.dto.request.CambiarEstadoPlatoRequest;
 import com.restaurante.restaurante_spring.dto.request.ModificarPlatoRequest;
 import com.restaurante.restaurante_spring.dto.request.PlatoRequest;
 import com.restaurante.restaurante_spring.dto.response.PlatoResponse;
@@ -140,6 +141,59 @@ public class PlatoServiceImpl implements PlatoService {
                 .estado(platoActualizado.getEstado())
                 .categoria(platoActualizado.getCategoria())
                 .mensaje("Plato modificado correctamente")
+                .build();
+    }
+
+    @Override
+    public PlatoResponse cambiarEstadoPlato(
+            Integer idPlato,
+            CambiarEstadoPlatoRequest request) {
+
+        Authentication authentication =
+                SecurityContextHolder.getContext().getAuthentication();
+
+        String correo = authentication.getName();
+
+        Usuario propietario = usuarioRepository.findByCorreo(correo)
+                .orElseThrow(() ->
+                        new RuntimeException(
+                                "El usuario autenticado no existe"));
+
+        if (propietario.getRol() == null ||
+                !"PROPIETARIO".equalsIgnoreCase(
+                        propietario.getRol().getNombre())) {
+
+            throw new RuntimeException(
+                    "El usuario no tiene rol de PROPIETARIO");
+        }
+
+        Plato plato = platoRepository.findById(idPlato)
+                .orElseThrow(() ->
+                        new RuntimeException(
+                                "El plato no existe"));
+
+        Restaurante restaurante = plato.getRestaurante();
+
+        if (!restaurante.getId_propietario()
+                .equals(propietario.getId())) {
+
+            throw new RuntimeException(
+                    "No tienes permisos para modificar este plato");
+        }
+
+        plato.setEstado(request.getEstado());
+
+        Plato platoActualizado =
+                platoRepository.save(plato);
+
+        return PlatoResponse.builder()
+                .nombre(platoActualizado.getNombre())
+                .descripcion(platoActualizado.getDescripcion())
+                .precio(platoActualizado.getPrecio())
+                .urlImagen(platoActualizado.getUrlImagen())
+                .estado(platoActualizado.getEstado())
+                .categoria(platoActualizado.getCategoria())
+                .mensaje("Estado del plato actualizado correctamente")
                 .build();
     }
 
