@@ -14,6 +14,9 @@ import com.restaurante.restaurante_spring.repository.RestauranteRepository;
 import com.restaurante.restaurante_spring.repository.UsuarioRepository;
 import com.restaurante.restaurante_spring.service.PedidoService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
@@ -97,5 +100,32 @@ public class PedidoServiceImpl implements PedidoService {
                 .estado(pedidoGuardado.getEstado())
                 .mensaje("Pedido creado exitosamente y está " + pedidoGuardado.getEstado())
                 .build();
+    }
+    // HU-12: Obtener pedidos filtrados por estado para el empleado autenticado
+    @Override
+    public Page<PedidoResponse> listarPedidosPorEstado(String estado, int page, int size) {
+        // 1. Obtener usuario autenticado desde el token
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        String correo = authentication.getName();
+
+        Usuario empleado = usuarioRepository.findByCorreo(correo)
+                .orElseThrow(() -> new RuntimeException("El usuario autenticado no existe"));
+
+        // 2. Validar que el usuario tenga rol EMPLEADO
+        if (empleado.getRol() == null || !"EMPLEADO".equalsIgnoreCase(empleado.getRol().getNombre())) {
+            throw new RuntimeException("Solo los usuarios con rol EMPLEADO pueden ver la lista de pedidos");
+        }
+
+        // 3. Paginación y consulta
+        Pageable pageable = PageRequest.of(page, size);
+        Page<Pedido> pedidosPage = pedidoRepository.findByEmpleadoCorreoYEstado(correo, estado, pageable);
+
+        // 4. Mapear cada entidad Pedido a PedidoResponse
+        return pedidosPage.map(pedido -> PedidoResponse.builder()
+                .idPedido(pedido.getId())
+                .fechaCreacion(pedido.getFechaCreacion())
+                .estado(pedido.getEstado())
+                .mensaje("Pedido encontrado")
+                .build());
     }
 }
