@@ -16,24 +16,36 @@
           "script": {
             "type": "text/javascript",
             "exec": [
-              "pm.test(\"Status code is 200\", function () {",
-              "    pm.response.to.have.status(200);",
-              "});"
+              "pm.test(\"Status code is 200\", function () {\n    pm.response.to.have.status(200);\n});"
             ]
           }
         }
       ],
       "request": {
+        "auth": {
+          "type": "noauth"
+        },
         "method": "GET",
         "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
         "url": {
-          "raw": "postman-echo.com/get",
+          "raw": "http://localhost:8080/restaurante/listar",
+          "protocol": "http",
           "host": [
-            "postman-echo",
-            "com"
+            "localhost"
           ],
+          "port": "8080",
           "path": [
-            "get"
+            "restaurante",
+            "listar"
           ]
         },
         "description": "This is a GET request and it is used to \"get\" data from an endpoint. There is no request body for a GET request, but you can use query parameters to help specify the resource you want data on (e.g., in this request, we have `id=1`).\n\nA successful GET response will have a `200 OK` status, and should include some kind of response body - for example, HTML web content or JSON data."
@@ -54,11 +66,14 @@
         }
       ],
       "request": {
+        "auth": {
+          "type": "noauth"
+        },
         "method": "POST",
         "header": [],
         "body": {
           "mode": "raw",
-          "raw": "{\n  \"nombre\": \"Carlos\",\n  \"apellido\": \"Mendoza\",\n  \"docIdentidad\": \"1020553\",\n  \"celular\": \"+573101234567\",\n  \"fecha_nacimiento\": \"1995-08-15\",\n  \"correo\": \"carlos.mendoza@example.com\",\n  \"password\": \"PasswordSegura123!\"\n}",
+          "raw": "{\n    \"nombre\": \"Juan\",\n    \"apellido\": \"Propietario3\",\n    \"docIdentidad\": \"10000004\",\n    \"celular\": \"3001234567\",\n    \"fecha_nacimiento\": \"2000-01-15\",\n    \"correo\": \"propietario@restaurante25.com\",\n    \"password\": \"Propietario123\"\n}",
           "options": {
             "raw": {
               "language": "json"
@@ -86,11 +101,14 @@
     {
       "name": "http://localhost:8080/restaurante",
       "request": {
+        "auth": {
+          "type": "noauth"
+        },
         "method": "POST",
         "header": [],
         "body": {
           "mode": "raw",
-          "raw": "{\r\n  \"nombre\": \"Restaurante El Sazón S.A.S.\",\r\n  \"nit\": \"9012345671\",\r\n  \"direccion\": \"Calle 45 # 12-34\",\r\n  \"telefono\": \"+573001234567\",\r\n  \"url_logo\": \"https://mi-servidor.com\",\r\n  \"id_propietario\": 1\r\n}",
+          "raw": "{\r\n    \"nombre\": \"Mi Restaurante 9\",\r\n    \"nit\": \"900244446\",\r\n    \"direccion\": \"Calle 10 # 20-30\",\r\n    \"telefono\": \"3001234567\",\r\n    \"url_logo\": \"https://ejemplo.com/logo.png\",\r\n    \"id_propietario\": 3\r\n}",
           "options": {
             "raw": {
               "language": "json"
@@ -114,11 +132,14 @@
     {
       "name": "http://localhost:8080/api/v1/platos/registro",
       "request": {
+        "auth": {
+          "type": "noauth"
+        },
         "method": "POST",
         "header": [],
         "body": {
           "mode": "raw",
-          "raw": "{\r\n    \"nombre\": \"Hamburguesa Especial\",\r\n    \"precio\": 25000,\r\n    \"descripcion\": \"Hamburguesa con carne, queso y tocineta\",\r\n    \"urlImagen\": \"https://ejemplo.com/hamburguesa.jpg\",\r\n    \"estado\": true,\r\n    \"categoria\": 1,\r\n    \"idRestaurante\": 1,\r\n    \"idPropietario\": 1\r\n}",
+          "raw": "{\r\n    \"nombre\": \"Hamburguesa rica rica\",\r\n    \"precio\": 20,\r\n    \"descripcion\": \"Hamburguesa quemada\",\r\n    \"urlImagen\": \"https://ejemplo.com/hamburguesa.jpg\",\r\n    \"estado\": true,\r\n    \"categoria\": 1,\r\n    \"idRestaurante\": 3\r\n}",
           "options": {
             "raw": {
               "language": "json"
@@ -145,11 +166,14 @@
     {
       "name": "http://localhost:8080/api/v1/categorias/registro",
       "request": {
+        "auth": {
+          "type": "noauth"
+        },
         "method": "POST",
         "header": [],
         "body": {
           "mode": "raw",
-          "raw": "{\r\n  \"nombre\": \"Hamburguesas\",\r\n  \"descripcion\": \"Deliciosas hamburguesas\"\r\n}",
+          "raw": "{\r\n  \"nombre\": \"Hamburguesas 5\",\r\n  \"descripcion\": \"Deliciosas hamburguesas\"\r\n}",
           "options": {
             "raw": {
               "language": "json"
@@ -180,7 +204,7 @@
         "header": [],
         "body": {
           "mode": "raw",
-          "raw": "{\r\n    \"correo\": \"carlos.mendoza@example.com\",\r\n    \"password\": \"PasswordSegura123!\"\r\n}",
+          "raw": "{\r\n    \"correo\": \"propietario@restaurante2.com\",\r\n    \"password\": \"Propietario123\"\r\n}",
           "options": {
             "raw": {
               "language": "json"
@@ -211,7 +235,7 @@
         "header": [],
         "body": {
           "mode": "raw",
-          "raw": "{\r\n    \"correo\": \"admin@restaurante.com\",\r\n    \"password\": \"Admin123\"\r\n}",
+          "raw": "{\r\n    \"correo\": \"adminnuevo@restaurante.com\",\r\n    \"password\": \"Admin123\"\r\n}",
           "options": {
             "raw": {
               "language": "json"
@@ -238,11 +262,14 @@
     {
       "name": "http://localhost:8080/api/v1/usuarios/empleado",
       "request": {
+        "auth": {
+          "type": "noauth"
+        },
         "method": "POST",
         "header": [],
         "body": {
           "mode": "raw",
-          "raw": "",
+          "raw": "{\r\n    \"nombre\": \"Carlos\",\r\n    \"apellido\": \"Empleado\",\r\n    \"docIdentidad\": \"10000\",\r\n    \"celular\": \"3009999999\",\r\n    \"correo\": \"empleado@restaurante2.com\",\r\n    \"idRol\": 3,\r\n    \"password\": \"Empleado123\"\r\n}",
           "options": {
             "raw": {
               "language": "json"
@@ -269,11 +296,14 @@
     {
       "name": "PUT /api/v1/platos/1",
       "request": {
+        "auth": {
+          "type": "noauth"
+        },
         "method": "PUT",
         "header": [],
         "body": {
           "mode": "raw",
-          "raw": "{\r\n    \"precio\": 28000,\r\n    \"descripcion\": \"Hamburguesa especial con queso cheddar\"\r\n}",
+          "raw": "{\r\n    \"precio\": 2000,\r\n    \"descripcion\": \"Hamburguesa nose\"\r\n}",
           "options": {
             "raw": {
               "language": "json"
@@ -331,11 +361,14 @@
     {
       "name": "http://localhost:8080/api/v1/platos/1/estado",
       "request": {
+        "auth": {
+          "type": "noauth"
+        },
         "method": "PUT",
         "header": [],
         "body": {
           "mode": "raw",
-          "raw": "{\r\n    \"estado\": false\r\n}",
+          "raw": "{\r\n    \"estado\": true\r\n}",
           "options": {
             "raw": {
               "language": "json"
@@ -386,6 +419,148 @@
             "v1",
             "usuarios",
             "cliente"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "http://localhost:8080/api/v1/platos/restaurante/1",
+      "request": {
+        "auth": {
+          "type": "noauth"
+        },
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "http://localhost:8080/api/v1/platos/restaurante/1",
+          "protocol": "http",
+          "host": [
+            "localhost"
+          ],
+          "port": "8080",
+          "path": [
+            "api",
+            "v1",
+            "platos",
+            "restaurante",
+            "1"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "http://localhost:8080/api/v1/pedidos",
+      "request": {
+        "auth": {
+          "type": "noauth"
+        },
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\r\n    \"idRestaurante\": 1,\r\n    \"platos\": [\r\n        {\r\n            \"idPlato\": 1,\r\n            \"cantidad\": 2\r\n        }\r\n    ]\r\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "http://localhost:8080/api/v1/pedidos",
+          "protocol": "http",
+          "host": [
+            "localhost"
+          ],
+          "port": "8080",
+          "path": [
+            "api",
+            "v1",
+            "pedidos"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "http://localhost:8080/api/v1/auth/login",
+      "request": {
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\r\n    \"correo\": \"cliente@test.com\",\r\n    \"password\": \"12345678\"\r\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "http://localhost:8080/api/v1/auth/login",
+          "protocol": "http",
+          "host": [
+            "localhost"
+          ],
+          "port": "8080",
+          "path": [
+            "api",
+            "v1",
+            "auth",
+            "login"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "http://localhost:8080/api/v1/auth/login",
+      "request": {
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\r\n    \"correo\": \"empleado@restaurante2.com\",\r\n    \"password\": \"Empleado123\"\r\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "http://localhost:8080/api/v1/auth/login",
+          "protocol": "http",
+          "host": [
+            "localhost"
+          ],
+          "port": "8080",
+          "path": [
+            "api",
+            "v1",
+            "auth",
+            "login"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "http://localhost:8080/api/v1/pedidos",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "http://localhost:8080/api/v1/pedidos",
+          "protocol": "http",
+          "host": [
+            "localhost"
+          ],
+          "port": "8080",
+          "path": [
+            "api",
+            "v1",
+            "pedidos"
           ]
         }
       },
