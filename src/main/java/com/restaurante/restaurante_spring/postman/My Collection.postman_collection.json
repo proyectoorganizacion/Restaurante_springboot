@@ -392,7 +392,7 @@
       "response": []
     },
     {
-      "name": "http://localhost:8080/api/v1/pedidos",
+      "name": "Listar pedidos",
       "request": {
         "auth": {
           "type": "bearer",
@@ -407,7 +407,7 @@
         "method": "GET",
         "header": [],
         "url": {
-          "raw": "http://localhost:8080/api/v1/pedidos?estado=PENDIENTE&page=0&size=5",
+          "raw": "http://localhost:8080/api/v1/pedidos",
           "protocol": "http",
           "host": [
             "localhost"
@@ -417,20 +417,6 @@
             "api",
             "v1",
             "pedidos"
-          ],
-          "query": [
-            {
-              "key": "estado",
-              "value": "PENDIENTE"
-            },
-            {
-              "key": "page",
-              "value": "0"
-            },
-            {
-              "key": "size",
-              "value": "5"
-            }
           ]
         }
       },

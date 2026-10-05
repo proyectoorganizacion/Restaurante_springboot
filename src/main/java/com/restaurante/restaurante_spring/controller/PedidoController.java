@@ -28,7 +28,7 @@ public class PedidoController {
     // HU-12: Obtener lista de pedidos filtrando por estado y paginado
     @GetMapping
     public ResponseEntity<Page<PedidoResponse>> obtenerPedidosPorEstado(
-            @RequestParam String estado,
+            @RequestParam(defaultValue = "PENDIENTE") String estado,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size) {
 
