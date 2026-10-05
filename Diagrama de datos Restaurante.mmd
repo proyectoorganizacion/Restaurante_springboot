@@ -1,0 +1,54 @@
+erDiagram
+    ROL ||--o{ USUARIO : tiene
+    USUARIO ||--o| RESTAURANTE : es_propietario
+    USUARIO ||--o{ EMPLEADO_RESTAURANTE : es_empleado
+    RESTAURANTE ||--o{ EMPLEADO_RESTAURANTE : emplea
+    RESTAURANTE ||--o{ PLATO : ofrece
+    CATEGORIA ||--o{ PLATO : clasifica
+    USUARIO ||--o{ PEDIDO : realiza_como_cliente
+    USUARIO ||--o{ PEDIDO : atiende_como_empleado
+    RESTAURANTE ||--o{ PEDIDO : recibe
+    PEDIDO ||--|{ DETALLE_PEDIDO : contiene
+    PLATO ||--o{ DETALLE_PEDIDO : incluye
+    PEDIDO ||--o{ TRAZABILIDAD_PEDIDO : genera
+
+    ROL {
+        int id PK
+        string nombre
+    }
+    USUARIO {
+        int id PK
+        string nombre
+        string doc_identidad
+        string correo
+        int id_rol FK
+    }
+    RESTAURANTE {
+        int id PK
+        string nombre
+        string nit
+        int id_propietario FK
+    }
+    PLATO {
+        int id PK
+        string nombre
+        decimal precio
+        boolean activo
+        int id_categoria FK
+        int id_restaurante FK
+    }
+    PEDIDO {
+        int id PK
+        string estado
+        string pin_entrega
+        int id_cliente FK
+        int id_empleado FK
+        int id_restaurante FK
+    }
+    TRAZABILIDAD_PEDIDO {
+        int id PK
+        int id_pedido FK
+        string estado_anterior
+        string estado_nuevo
+        datetime fecha_cambio
+    }

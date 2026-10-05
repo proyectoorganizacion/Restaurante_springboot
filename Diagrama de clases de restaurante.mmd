@@ -1,0 +1,158 @@
+classDiagram
+    direction TB
+
+    %% --- MODELO DE DOMINIO / ENTIDADES ---
+
+    class Rol {
+        +Long id
+        +String nombre
+        +String descripcion
+    }
+
+    class Usuario {
+        +Long id
+        +String nombre
+        +String apellido
+        +String docIdentidad
+        +String celular
+        +String correo
+        +String clave
+        +Rol rol
+        +boolean autenticar(String claveIngresada)
+    }
+
+    class Restaurante {
+        +Long id
+        +String nombre
+        +String nit
+        +String direccion
+        +String telefono
+        +String urlLogo
+        +Usuario propietario
+    }
+
+    class EmpleadoRestaurante {
+        +Long id
+        +Usuario empleado
+        +Restaurante restaurante
+    }
+
+    class Categoria {
+        +Long id
+        +String nombre
+        +String descripcion
+    }
+
+    class Plato {
+        +Long id
+        +String nombre
+        +Double precio
+        +String descripcion
+        +String urlImagen
+        +Boolean activo
+        +Categoria categoria
+        +Restaurante restaurante
+        +void cambiarEstado(Boolean nuevoEstado)
+        +void actualizarDatos(String nombre, Double precio, String descripcion)
+    }
+
+    class EstadoPedido {
+        <<enumeration>>
+        PENDIENTE
+        EN_PREPARACION
+        LISTO
+        ENTREGADO
+        CANCELADO
+    }
+
+    class Pedido {
+        +Long id
+        +LocalDateTime fechaCreacion
+        +EstadoPedido estado
+        +String pinEntrega
+        +Usuario cliente
+        +Usuario empleadoAsignado
+        +Restaurante restaurante
+        +List~DetallePedido~ detalles
+        +void asignarEmpleado(Usuario empleado)
+        +void cambiarEstado(EstadoPedido nuevoEstado)
+        +String generarPin()
+    }
+
+    class DetallePedido {
+        +Long id
+        +Plato plato
+        +Integer cantidad
+        +Double precioUnitario
+        +Double calcularSubtotal()
+    }
+
+    class TrazabilidadPedido {
+        +Long id
+        +Long pedidoId
+        +EstadoPedido estadoAnterior
+        +EstadoPedido estadoNuevo
+        +LocalDateTime fechaCambio
+        +Long usuarioCambioId
+    }
+
+    %% --- SERVICIOS / CASOS DE USO (BUSINESS LOGIC) ---
+
+    class AuthService {
+        +String login(String correo, String clave)
+        +Usuario registrarCliente(UsuarioDTO dto)
+    }
+
+    class AdminService {
+        +Usuario crearPropietario(UsuarioDTO dto)
+        +Restaurante crearRestaurante(RestauranteDTO dto)
+    }
+
+    class PropietarioService {
+        +Usuario crearEmpleado(UsuarioDTO dto, Long restauranteId)
+        +Plato crearPlato(PlatoDTO dto, Long restauranteId)
+        +Plato modificarPlato(Long platoId, PlatoDTO dto)
+        +void cambiarEstadoPlato(Long platoId, Boolean activo)
+    }
+
+    class RestoService {
+        +List~Restaurante~ listarRestaurantes(int pagina, int tamaño)
+        +List~Plato~ listarPlatosRestaurante(Long restauranteId)
+    }
+
+    class PedidoService {
+        +Pedido realizarPedido(PedidoDTO dto)
+        +List~Pedido~ obtenerPedidosPorEstado(EstadoPedido estado, Long restauranteId)
+        +void asignarseYPreparar(Long pedidoId, Long empleadoId)
+        +void notificarPedidoListo(Long pedidoId)
+        +void entregarPedido(Long pedidoId, String pin)
+        +void cancelarPedido(Long pedidoId)
+    }
+
+    class TrazabilidadService {
+        +void registrarCambioEstado(Long pedidoId, EstadoPedido ant, EstadoPedido nuevo, Long usuarioId)
+        +List~TrazabilidadPedido~ consultarTrazabilidad(Long pedidoId)
+        +EficienciaDTO consultarEficiencia(Long restauranteId)
+    }
+
+    %% --- RELACIONES ---
+
+    Usuario "1" --> "1" Rol : tiene
+    Restaurante "1" --> "1" Usuario : pertenece a (Propietario)
+    EmpleadoRestaurante "*" --> "1" Usuario : referencia
+    EmpleadoRestaurante "*" --> "1" Restaurante : asignado a
+    Plato "*" --> "1" Categoria : pertenece a
+    Plato "*" --> "1" Restaurante : ofrecido en
+    Pedido "*" --> "1" Usuario : cliente
+    Pedido "*" --> "0..1" Usuario : empleado
+    Pedido "*" --> "1" Restaurante : pertenece a
+    Pedido "1" *-- "*" DetallePedido : contiene
+    DetallePedido "*" --> "1" Plato : referencia
+    Pedido --> EstadoPedido : usa
+
+    AuthService ..> Usuario
+    AdminService ..> Restaurante
+    PropietarioService ..> Plato
+    PedidoService ..> Pedido
+    TrazabilidadService ..> TrazabilidadPedido
+    
