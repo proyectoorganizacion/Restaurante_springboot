@@ -1,4 +1,3 @@
-DROP DATABASE IF EXISTS restaurante_db;
 CREATE DATABASE restaurante_db;
 USE restaurante_db;
 
@@ -17,15 +16,15 @@ INSERT INTO rol (id, nombre) VALUES
 (4, 'CLIENTE');
 
 -- ==========================================
--- 2. TABLA DE USUARIOS (Con campos completos solicitados)
+-- 2. TABLA DE USUARIOS
 -- ==========================================
 CREATE TABLE usuario (
     id INT AUTO_INCREMENT PRIMARY KEY,
     nombre VARCHAR(100) NOT NULL,
-    apellido VARCHAR(100) NOT NULL, -- Agregado para cumplir con la solicitud del Scrum Master
-    doc_identidad VARCHAR(20) NOT NULL UNIQUE, 
+    apellido VARCHAR(100) NOT NULL,
+    docIdentidad VARCHAR(20) NOT NULL UNIQUE,
     celular VARCHAR(13),
-    fecha_nacimiento DATE NOT NULL,
+    fecha_nacimiento DATE NULL,
     correo VARCHAR(100) NOT NULL UNIQUE,
     password VARCHAR(255) NOT NULL,
     id_rol INT NOT NULL,
@@ -47,7 +46,7 @@ CREATE TABLE restaurante (
 );
 
 -- ==========================================
--- 4. TABLA DE CATEGORÍAS
+-- 4. TABLA DE CATEGORÍAS (Para relacionarla con los platos)
 -- ==========================================
 CREATE TABLE categoria (
     id INT AUTO_INCREMENT PRIMARY KEY,
@@ -56,14 +55,14 @@ CREATE TABLE categoria (
 );
 
 -- ==========================================
--- 5. TABLA DE PLATOS
+-- 5. TABLA DE PLATOS (Con la relación corregida a categoría)
 -- ==========================================
 CREATE TABLE plato (
     id INT AUTO_INCREMENT PRIMARY KEY,
     nombre VARCHAR(100) NOT NULL,
     precio DECIMAL(10, 2) NOT NULL,
     descripcion VARCHAR(255),
-    url_imagen VARCHAR(255),
+    urlImagen VARCHAR(255),
     activo BOOLEAN NOT NULL DEFAULT TRUE,
     id_restaurante INT NOT NULL,
     id_categoria INT NOT NULL,
@@ -71,9 +70,12 @@ CREATE TABLE plato (
     CONSTRAINT fk_plato_categoria FOREIGN KEY (id_categoria) REFERENCES categoria(id)
 );
 
+
 -- ==========================================
--- 6. EMPLEADO_RESTAURANTE (HU 6)
+-- 6. EXTENSIÓN HASTA LA HU 12
 -- ==========================================
+
+-- Empleado Restaurante (HU 6)
 CREATE TABLE empleado_restaurante (
     id INT AUTO_INCREMENT PRIMARY KEY,
     id_usuario INT NOT NULL,
@@ -82,9 +84,7 @@ CREATE TABLE empleado_restaurante (
     CONSTRAINT fk_empleado_restaurante FOREIGN KEY (id_restaurante) REFERENCES restaurante(id)
 );
 
--- ==========================================
--- 7. PEDIDOS (Estructura para HU-11 y HU-12)
--- ==========================================
+-- Pedidos (HU 11 y HU 12)
 CREATE TABLE pedido (
     id INT AUTO_INCREMENT PRIMARY KEY,
     fecha_creacion DATETIME NOT NULL,
@@ -98,9 +98,7 @@ CREATE TABLE pedido (
     CONSTRAINT fk_pedido_restaurante FOREIGN KEY (id_restaurante) REFERENCES restaurante(id)
 );
 
--- ==========================================
--- 8. DETALLE DE PEDIDOS (HU-11)
--- ==========================================
+-- Detalle de Pedidos
 CREATE TABLE detalle_pedido (
     id INT AUTO_INCREMENT PRIMARY KEY,
     cantidad INT NOT NULL,
@@ -111,9 +109,7 @@ CREATE TABLE detalle_pedido (
     CONSTRAINT fk_detalle_plato FOREIGN KEY (id_plato) REFERENCES plato(id)
 );
 
--- ==========================================
--- 9. TRAZABILIDAD DE PEDIDOS
--- ==========================================
+-- Trazabilidad de Pedidos
 CREATE TABLE trazabilidad_pedido (
     id INT AUTO_INCREMENT PRIMARY KEY,
     id_pedido INT NOT NULL,
@@ -124,3 +120,19 @@ CREATE TABLE trazabilidad_pedido (
     CONSTRAINT fk_trazabilidad_pedido FOREIGN KEY (id_pedido) REFERENCES pedido(id),
     CONSTRAINT fk_trazabilidad_usuario FOREIGN KEY (id_usuario_cambio) REFERENCES usuario(id)
 );
+
+
+-- ==========================================
+-- CONSULTAS DE VERIFICACIÓN
+-- ==========================================
+SELECT * FROM rol;
+SELECT * FROM usuario;
+SELECT * FROM restaurante;
+SELECT * FROM categoria;
+SELECT * FROM plato;
+SELECT * FROM empleado_restaurante;
+SELECT * FROM pedido;
+
+
+
+
