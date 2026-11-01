@@ -13,6 +13,7 @@ import com.restaurante.restaurante_spring.repository.PlatoRepository;
 import com.restaurante.restaurante_spring.repository.RestauranteRepository;
 import com.restaurante.restaurante_spring.repository.UsuarioRepository;
 import com.restaurante.restaurante_spring.service.PedidoService;
+import com.restaurante.restaurante_spring.service.SmsService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -35,6 +36,7 @@ public class PedidoServiceImpl implements PedidoService {
     private final PlatoRepository platoRepository;
     private final RestauranteRepository restauranteRepository;
     private final UsuarioRepository usuarioRepository;
+    private final SmsService smsService;
 
     @Override
     public PedidoResponse crearPedido(PedidoRequest request) {
@@ -164,9 +166,10 @@ public class PedidoServiceImpl implements PedidoService {
         Pedido pedidoGuardado = pedidoRepository.save(pedido);
 
         // 7. Simulación / Envío de notificación SMS al cliente
-        // String telefonoCliente = pedido.getCliente().getCelular();
-        // smsService.enviarSms(telefonoCliente, "Tu pedido está listo. Tu PIN de entrega es: " + pinGenerado);
+        String telefonoCliente = pedido.getCliente().getCelular();
+        String mensajeSms = "Tu pedido #" + pedido.getId() + " esta LISTO. Tu PIN de seguridad es: " + pinGenerado;
 
+        smsService.enviarSms(telefonoCliente, mensajeSms);
         return PedidoResponse.builder()
                 .idPedido(pedidoGuardado.getId())
                 .fechaCreacion(pedidoGuardado.getFechaCreacion())
