@@ -20,6 +20,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -127,5 +128,51 @@ public class PedidoServiceImpl implements PedidoService {
                 .estado(pedido.getEstado())
                 .mensaje("Pedido encontrado")
                 .build());
+    }
+    // HU-14: Notificar que el pedido está listo
+    @Override
+    @Transactional
+    public PedidoResponse marcarPedidoComoListo(Integer idPedido) {
+        // 1. Obtener correo del usuario autenticado
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        String correo = authentication.getName();
+
+        Usuario empleado = usuarioRepository.findByCorreo(correo)
+                .orElseThrow(() -> new RuntimeException("El usuario autenticado no existe"));
+
+        // 2. Validar rol EMPLEADO
+        if (empleado.getRol() == null || !"EMPLEADO".equalsIgnoreCase(empleado.getRol().getNombre())) {
+            throw new RuntimeException("Solo los usuarios con rol EMPLEADO pueden marcar pedidos como listos");
+        }
+
+        // 3. Buscar el pedido
+        Pedido pedido = pedidoRepository.findById(idPedido)
+                .orElseThrow(() -> new RuntimeException("El pedido con ID " + idPedido + " no existe"));
+
+        // 4. Validar estado (debe estar EN_PREPARACION)
+        if (!"EN_PREPARACION".equalsIgnoreCase(pedido.getEstado())) {
+            throw new RuntimeException("Solo se pueden pasar a listo pedidos que estén en estado EN_PREPARACION");
+        }
+
+        // 5. Generar PIN de seguridad de 4 dígitos (ejemplo: 1234)
+        String pinGenerado = String.format("%04d", (int) (Math.random() * 10000));
+        pedido.setPinEntrega(pinGenerado);
+
+        // 6. Cambiar estado a LISTO
+        pedido.setEstado("LISTO");
+
+        Pedido pedidoGuardado = pedidoRepository.save(pedido);
+
+        // 7. Simulación / Envío de notificación SMS al cliente
+        // String telefonoCliente = pedido.getCliente().getCelular();
+        // smsService.enviarSms(telefonoCliente, "Tu pedido está listo. Tu PIN de entrega es: " + pinGenerado);
+
+        return PedidoResponse.builder()
+                .idPedido(pedidoGuardado.getId())
+                .fechaCreacion(pedidoGuardado.getFechaCreacion())
+                .estado(pedidoGuardado.getEstado())
+                .idEmpleadoAsignado(empleado.getId())
+                .mensaje("Pedido marcado como LISTO. PIN generado y notificado al cliente: " + pinGenerado)
+                .build();
     }
 }
