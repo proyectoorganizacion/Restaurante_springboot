@@ -35,4 +35,10 @@ public class PedidoController {
         Page<PedidoResponse> response = pedidoService.listarPedidosPorEstado(estado, page, size);
         return ResponseEntity.ok(response);
     }
+    // HU-13: Asignarse a un pedido y cambiar estado a EN_PREPARACION
+    @PutMapping("/{id}/en-preparacion")
+    public ResponseEntity<PedidoResponse> asignarseAPedido(@PathVariable Integer id) {
+        PedidoResponse response = pedidoService.asignarseAPedido(id);
+        return ResponseEntity.ok(response);
+    }
 }
