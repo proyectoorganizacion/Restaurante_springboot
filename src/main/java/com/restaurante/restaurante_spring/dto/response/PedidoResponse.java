@@ -12,5 +12,6 @@ public class PedidoResponse {
     private Integer idPedido;
     private LocalDateTime fechaCreacion;
     private String estado;
+    private Integer idEmpleadoAsignado;
     private String mensaje;
 }

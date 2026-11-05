@@ -128,4 +128,43 @@ public class PedidoServiceImpl implements PedidoService {
                 .mensaje("Pedido encontrado")
                 .build());
     }
+    // HU-13: Asignarse a un pedido y cambiar estado a EN_PREPARACION
+    @Override
+    public PedidoResponse asignarseAPedido(Integer idPedido) {
+        // 1. Obtener correo del usuario autenticado desde el token JWT
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        String correo = authentication.getName();
+
+        Usuario empleado = usuarioRepository.findByCorreo(correo)
+                .orElseThrow(() -> new RuntimeException("El usuario autenticado no existe"));
+
+        // 2. Validar que el usuario tenga rol EMPLEADO
+        if (empleado.getRol() == null || !"EMPLEADO".equalsIgnoreCase(empleado.getRol().getNombre())) {
+            throw new RuntimeException("Solo los usuarios con rol EMPLEADO pueden asignarse pedidos");
+        }
+
+        // 3. Buscar el pedido por ID
+        Pedido pedido = pedidoRepository.findById(idPedido)
+                .orElseThrow(() -> new RuntimeException("El pedido con ID " + idPedido + " no existe"));
+
+        // 4. Validar que el pedido esté en estado PENDIENTE
+        if (!"PENDIENTE".equalsIgnoreCase(pedido.getEstado())) {
+            throw new RuntimeException("Solo se pueden asignar pedidos que estén en estado PENDIENTE");
+        }
+
+        // 5. Asignar el empleado y cambiar el estado
+        pedido.setEmpleadoAsignado(empleado);
+        pedido.setEstado("EN_PREPARACION");
+
+        Pedido pedidoGuardado = pedidoRepository.save(pedido);
+
+        // 6. Retornar la respuesta
+        return PedidoResponse.builder()
+                .idPedido(pedidoGuardado.getId())
+                .fechaCreacion(pedidoGuardado.getFechaCreacion())
+                .estado(pedidoGuardado.getEstado())
+                .idEmpleadoAsignado(empleado.getId())
+                .mensaje("Pedido asignado exitosamente y cambiado a estado EN_PREPARACION")
+                .build();
+    }
 }
