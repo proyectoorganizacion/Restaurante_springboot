@@ -135,33 +135,43 @@ public class PedidoServiceImpl implements PedidoService {
     @Override
     @Transactional
     public PedidoResponse marcarPedidoComoListo(Integer idPedido) {
-        // 1. Obtener correo del usuario autenticado
-    // HU-13: Asignarse a un pedido y cambiar estado a EN_PREPARACION
-    @Override
-    public PedidoResponse asignarseAPedido(Integer idPedido) {
-        // 1. Obtener correo del usuario autenticado desde el token JWT
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+
+        // 1. Obtener el empleado autenticado
+        Authentication authentication =
+                SecurityContextHolder.getContext().getAuthentication();
+
         String correo = authentication.getName();
 
         Usuario empleado = usuarioRepository.findByCorreo(correo)
-                .orElseThrow(() -> new RuntimeException("El usuario autenticado no existe"));
+                .orElseThrow(() ->
+                        new RuntimeException(
+                                "El usuario autenticado no existe"));
 
         // 2. Validar rol EMPLEADO
-        if (empleado.getRol() == null || !"EMPLEADO".equalsIgnoreCase(empleado.getRol().getNombre())) {
-            throw new RuntimeException("Solo los usuarios con rol EMPLEADO pueden marcar pedidos como listos");
+        if (empleado.getRol() == null
+                || !"EMPLEADO".equalsIgnoreCase(
+                empleado.getRol().getNombre())) {
+
+            throw new RuntimeException(
+                    "Solo los usuarios con rol EMPLEADO pueden marcar pedidos como listos");
         }
 
         // 3. Buscar el pedido
         Pedido pedido = pedidoRepository.findById(idPedido)
-                .orElseThrow(() -> new RuntimeException("El pedido con ID " + idPedido + " no existe"));
+                .orElseThrow(() ->
+                        new RuntimeException(
+                                "El pedido con ID " + idPedido + " no existe"));
 
-        // 4. Validar estado (debe estar EN_PREPARACION)
+        // 4. Validar estado
         if (!"EN_PREPARACION".equalsIgnoreCase(pedido.getEstado())) {
-            throw new RuntimeException("Solo se pueden pasar a listo pedidos que estén en estado EN_PREPARACION");
+            throw new RuntimeException(
+                    "Solo se pueden pasar a listo pedidos que estén en estado EN_PREPARACION");
         }
 
-        // 5. Generar PIN de seguridad de 4 dígitos (ejemplo: 1234)
-        String pinGenerado = String.format("%04d", (int) (Math.random() * 10000));
+        // 5. Generar PIN de entrega
+        String pinGenerado =
+                String.format("%04d", (int) (Math.random() * 10000));
+
         pedido.setPinEntrega(pinGenerado);
 
         // 6. Cambiar estado a LISTO
@@ -169,33 +179,65 @@ public class PedidoServiceImpl implements PedidoService {
 
         Pedido pedidoGuardado = pedidoRepository.save(pedido);
 
-        // 7. Simulación / Envío de notificación SMS al cliente
+        // 7. Notificar al cliente mediante Twilio
         String telefonoCliente = pedido.getCliente().getCelular();
         String mensajeSms = "sms_order_confirmation";
-        smsService.enviarSms(telefonoCliente, mensajeSms);
 
         smsService.enviarSms(telefonoCliente, mensajeSms);
-        // 2. Validar que el usuario tenga rol EMPLEADO
-        if (empleado.getRol() == null || !"EMPLEADO".equalsIgnoreCase(empleado.getRol().getNombre())) {
-            throw new RuntimeException("Solo los usuarios con rol EMPLEADO pueden asignarse pedidos");
+
+        // 8. Retornar respuesta
+        return PedidoResponse.builder()
+                .idPedido(pedidoGuardado.getId())
+                .fechaCreacion(pedidoGuardado.getFechaCreacion())
+                .estado(pedidoGuardado.getEstado())
+                .idEmpleadoAsignado(empleado.getId())
+                .mensaje("Pedido marcado como LISTO y PIN generado")
+                .build();
+    }
+
+    // HU-13: Asignarse a un pedido y cambiar estado a EN_PREPARACION
+    @Override
+    public PedidoResponse asignarseAPedido(Integer idPedido) {
+
+        // 1. Obtener el empleado autenticado
+        Authentication authentication =
+                SecurityContextHolder.getContext().getAuthentication();
+
+        String correo = authentication.getName();
+
+        Usuario empleado = usuarioRepository.findByCorreo(correo)
+                .orElseThrow(() ->
+                        new RuntimeException(
+                                "El usuario autenticado no existe"));
+
+        // 2. Validar rol EMPLEADO
+        if (empleado.getRol() == null
+                || !"EMPLEADO".equalsIgnoreCase(
+                empleado.getRol().getNombre())) {
+
+            throw new RuntimeException(
+                    "Solo los usuarios con rol EMPLEADO pueden asignarse pedidos");
         }
 
-        // 3. Buscar el pedido por ID
+        // 3. Buscar el pedido
         Pedido pedido = pedidoRepository.findById(idPedido)
-                .orElseThrow(() -> new RuntimeException("El pedido con ID " + idPedido + " no existe"));
+                .orElseThrow(() ->
+                        new RuntimeException(
+                                "El pedido con ID " + idPedido + " no existe"));
 
-        // 4. Validar que el pedido esté en estado PENDIENTE
+        // 4. Validar que el pedido esté PENDIENTE
         if (!"PENDIENTE".equalsIgnoreCase(pedido.getEstado())) {
-            throw new RuntimeException("Solo se pueden asignar pedidos que estén en estado PENDIENTE");
+            throw new RuntimeException(
+                    "Solo se pueden asignar pedidos que estén en estado PENDIENTE");
         }
 
-        // 5. Asignar el empleado y cambiar el estado
+        // 5. Asignar empleado y cambiar estado
         pedido.setEmpleadoAsignado(empleado);
         pedido.setEstado("EN_PREPARACION");
 
         Pedido pedidoGuardado = pedidoRepository.save(pedido);
 
-        // 6. Retornar la respuesta
+        // 6. Retornar respuesta
         return PedidoResponse.builder()
                 .idPedido(pedidoGuardado.getId())
                 .fechaCreacion(pedidoGuardado.getFechaCreacion())
