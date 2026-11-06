@@ -13,6 +13,7 @@ import com.restaurante.restaurante_spring.repository.PlatoRepository;
 import com.restaurante.restaurante_spring.repository.RestauranteRepository;
 import com.restaurante.restaurante_spring.repository.UsuarioRepository;
 import com.restaurante.restaurante_spring.service.PedidoService;
+import com.restaurante.restaurante_spring.service.SmsService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -20,6 +21,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -34,6 +36,7 @@ public class PedidoServiceImpl implements PedidoService {
     private final PlatoRepository platoRepository;
     private final RestauranteRepository restauranteRepository;
     private final UsuarioRepository usuarioRepository;
+    private final SmsService smsService;
 
     @Override
     public PedidoResponse crearPedido(PedidoRequest request) {
@@ -128,6 +131,11 @@ public class PedidoServiceImpl implements PedidoService {
                 .mensaje("Pedido encontrado")
                 .build());
     }
+    // HU-14: Notificar que el pedido está listo
+    @Override
+    @Transactional
+    public PedidoResponse marcarPedidoComoListo(Integer idPedido) {
+        // 1. Obtener correo del usuario autenticado
     // HU-13: Asignarse a un pedido y cambiar estado a EN_PREPARACION
     @Override
     public PedidoResponse asignarseAPedido(Integer idPedido) {
@@ -138,6 +146,35 @@ public class PedidoServiceImpl implements PedidoService {
         Usuario empleado = usuarioRepository.findByCorreo(correo)
                 .orElseThrow(() -> new RuntimeException("El usuario autenticado no existe"));
 
+        // 2. Validar rol EMPLEADO
+        if (empleado.getRol() == null || !"EMPLEADO".equalsIgnoreCase(empleado.getRol().getNombre())) {
+            throw new RuntimeException("Solo los usuarios con rol EMPLEADO pueden marcar pedidos como listos");
+        }
+
+        // 3. Buscar el pedido
+        Pedido pedido = pedidoRepository.findById(idPedido)
+                .orElseThrow(() -> new RuntimeException("El pedido con ID " + idPedido + " no existe"));
+
+        // 4. Validar estado (debe estar EN_PREPARACION)
+        if (!"EN_PREPARACION".equalsIgnoreCase(pedido.getEstado())) {
+            throw new RuntimeException("Solo se pueden pasar a listo pedidos que estén en estado EN_PREPARACION");
+        }
+
+        // 5. Generar PIN de seguridad de 4 dígitos (ejemplo: 1234)
+        String pinGenerado = String.format("%04d", (int) (Math.random() * 10000));
+        pedido.setPinEntrega(pinGenerado);
+
+        // 6. Cambiar estado a LISTO
+        pedido.setEstado("LISTO");
+
+        Pedido pedidoGuardado = pedidoRepository.save(pedido);
+
+        // 7. Simulación / Envío de notificación SMS al cliente
+        String telefonoCliente = pedido.getCliente().getCelular();
+        String mensajeSms = "sms_order_confirmation";
+        smsService.enviarSms(telefonoCliente, mensajeSms);
+
+        smsService.enviarSms(telefonoCliente, mensajeSms);
         // 2. Validar que el usuario tenga rol EMPLEADO
         if (empleado.getRol() == null || !"EMPLEADO".equalsIgnoreCase(empleado.getRol().getNombre())) {
             throw new RuntimeException("Solo los usuarios con rol EMPLEADO pueden asignarse pedidos");

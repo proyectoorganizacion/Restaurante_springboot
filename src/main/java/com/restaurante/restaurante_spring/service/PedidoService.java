@@ -9,5 +9,6 @@ public interface PedidoService {
     // HU-12: Obtener lista de pedidos filtrando por estado con paginación
     Page<PedidoResponse> listarPedidosPorEstado(String estado, int page, int size);
 
+    PedidoResponse marcarPedidoComoListo(Integer idPedido);
     PedidoResponse asignarseAPedido(Integer idPedido);
 }

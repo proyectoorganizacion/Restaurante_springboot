@@ -35,6 +35,10 @@ public class PedidoController {
         Page<PedidoResponse> response = pedidoService.listarPedidosPorEstado(estado, page, size);
         return ResponseEntity.ok(response);
     }
+    // HU-14: Notificar que el pedido está listo
+    @PutMapping("/{id}/listo")
+    public ResponseEntity<PedidoResponse> marcarPedidoComoListo(@PathVariable Integer id) {
+        PedidoResponse response = pedidoService.marcarPedidoComoListo(id);
     // HU-13: Asignarse a un pedido y cambiar estado a EN_PREPARACION
     @PutMapping("/{id}/en-preparacion")
     public ResponseEntity<PedidoResponse> asignarseAPedido(@PathVariable Integer id) {
