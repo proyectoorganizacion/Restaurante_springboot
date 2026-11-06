@@ -10,4 +10,5 @@ public interface PedidoService {
     Page<PedidoResponse> listarPedidosPorEstado(String estado, int page, int size);
 
     PedidoResponse marcarPedidoComoListo(Integer idPedido);
+    PedidoResponse asignarseAPedido(Integer idPedido);
 }

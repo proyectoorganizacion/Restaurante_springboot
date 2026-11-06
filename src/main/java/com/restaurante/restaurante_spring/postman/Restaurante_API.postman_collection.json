@@ -467,11 +467,13 @@
               "type": "string"
             }
           ]
+          ]
         },
         "method": "PUT",
         "header": [],
         "url": {
           "raw": "http://localhost:8080/api/v1/pedidos/1/listo",
+          "raw": "http://localhost:8080/api/v1/pedidos/1/en-preparacion",
           "protocol": "http",
           "host": [
             "localhost"
@@ -483,6 +485,7 @@
             "pedidos",
             "1",
             "listo"
+            "en-preparacion"
           ]
         }
       },
