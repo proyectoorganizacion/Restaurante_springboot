@@ -167,7 +167,8 @@ public class PedidoServiceImpl implements PedidoService {
 
         // 7. Simulación / Envío de notificación SMS al cliente
         String telefonoCliente = pedido.getCliente().getCelular();
-        String mensajeSms = "Tu pedido #" + pedido.getId() + " esta LISTO. Tu PIN de seguridad es: " + pinGenerado;
+        String mensajeSms = "sms_order_confirmation";
+        smsService.enviarSms(telefonoCliente, mensajeSms);
 
         smsService.enviarSms(telefonoCliente, mensajeSms);
         return PedidoResponse.builder()
