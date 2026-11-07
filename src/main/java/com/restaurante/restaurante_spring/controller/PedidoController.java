@@ -1,5 +1,6 @@
 package com.restaurante.restaurante_spring.controller;
 
+import com.restaurante.restaurante_spring.dto.request.EntregarPedidoRequest;
 import com.restaurante.restaurante_spring.dto.request.PedidoRequest;
 import com.restaurante.restaurante_spring.dto.response.PedidoResponse;
 import com.restaurante.restaurante_spring.service.PedidoService;
@@ -9,6 +10,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
 
 @RestController
 @RequestMapping("/api/v1/pedidos")
@@ -60,6 +62,29 @@ public class PedidoController {
 
         PedidoResponse response =
                 pedidoService.marcarPedidoComoListo(id);
+
+        return ResponseEntity.ok(response);
+    }
+
+    // HU-15: Entregar pedido (marcarlo como ENTREGADO) con el PIN de seguridad
+    @PutMapping("/{id}/entregado")
+    public ResponseEntity<PedidoResponse> entregarPedido(
+            @PathVariable Integer id,
+            @Valid @RequestBody EntregarPedidoRequest request) {
+
+        PedidoResponse response =
+                pedidoService.entregarPedido(id, request);
+
+        return ResponseEntity.ok(response);
+    }
+
+    // HU-16: Cancelar pedido (solo el cliente dueño y en estado PENDIENTE)
+    @PutMapping("/{id}/cancelar")
+    public ResponseEntity<PedidoResponse> cancelarPedido(
+            @PathVariable Integer id) {
+
+        PedidoResponse response =
+                pedidoService.cancelarPedido(id);
 
         return ResponseEntity.ok(response);
     }

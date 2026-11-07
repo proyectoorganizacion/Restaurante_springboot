@@ -1,5 +1,6 @@
 package com.restaurante.restaurante_spring.service;
 
+import com.restaurante.restaurante_spring.dto.request.EntregarPedidoRequest;
 import com.restaurante.restaurante_spring.dto.request.PedidoRequest;
 import com.restaurante.restaurante_spring.dto.response.PedidoResponse;
 import org.springframework.data.domain.Page;
@@ -11,4 +12,10 @@ public interface PedidoService {
 
     PedidoResponse marcarPedidoComoListo(Integer idPedido);
     PedidoResponse asignarseAPedido(Integer idPedido);
+
+    // HU-15: Marcar pedido como ENTREGADO validando el PIN de seguridad
+    PedidoResponse entregarPedido(Integer idPedido, EntregarPedidoRequest request);
+
+    // HU-16: Cancelar pedido (solo el cliente dueño y en estado PENDIENTE)
+    PedidoResponse cancelarPedido(Integer idPedido);
 }

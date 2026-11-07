@@ -1,6 +1,9 @@
 package com.restaurante.restaurante_spring.service.impl;
 
 import com.restaurante.restaurante_spring.dto.request.PedidoPlatoRequest;
+import com.restaurante.restaurante_spring.dto.request.EntregarPedidoRequest;
+import com.restaurante.restaurante_spring.entity.EstadoPedido;
+import com.restaurante.restaurante_spring.repository.EmpleadoRestauranteRepository;
 import com.restaurante.restaurante_spring.dto.request.PedidoRequest;
 import com.restaurante.restaurante_spring.dto.response.PedidoResponse;
 import com.restaurante.restaurante_spring.entity.DetallePedido;
@@ -37,6 +40,7 @@ public class PedidoServiceImpl implements PedidoService {
     private final RestauranteRepository restauranteRepository;
     private final UsuarioRepository usuarioRepository;
     private final SmsService smsService;
+    private final EmpleadoRestauranteRepository empleadoRestauranteRepository;
 
     @Override
     public PedidoResponse crearPedido(PedidoRequest request) {
@@ -245,5 +249,131 @@ public class PedidoServiceImpl implements PedidoService {
                 .idEmpleadoAsignado(empleado.getId())
                 .mensaje("Pedido asignado exitosamente y cambiado a estado EN_PREPARACION")
                 .build();
+    }
+
+    // HU-15: Entregar pedido (marcarlo como ENTREGADO) validando el PIN de seguridad
+    @Override
+    @Transactional
+    public PedidoResponse entregarPedido(Integer idPedido, EntregarPedidoRequest request) {
+
+        // 1. Obtener el empleado autenticado
+        Usuario empleado = obtenerUsuarioAutenticado();
+
+        // 2. Validar rol EMPLEADO
+        if (empleado.getRol() == null
+                || !"EMPLEADO".equalsIgnoreCase(empleado.getRol().getNombre())) {
+            throw new RuntimeException(
+                    "Solo los usuarios con rol EMPLEADO pueden entregar pedidos");
+        }
+
+        // 3. Buscar el pedido
+        Pedido pedido = pedidoRepository.findById(idPedido)
+                .orElseThrow(() -> new RuntimeException(
+                        "El pedido con ID " + idPedido + " no existe"));
+
+        // 4. Validar que el empleado trabaje en el restaurante del pedido
+        boolean trabajaEnRestaurante = empleadoRestauranteRepository
+                .existsByUsuarioIdAndRestauranteId(
+                        empleado.getId(), pedido.getRestaurante().getId());
+
+        if (!trabajaEnRestaurante) {
+            throw new RuntimeException(
+                    "No puedes entregar pedidos de un restaurante en el que no trabajas");
+        }
+
+        // 5. Validar la transición de estado (Patrón State)
+        EstadoPedido estadoActual = EstadoPedido.desdeTexto(pedido.getEstado());
+
+        // Criterio 2: un pedido ENTREGADO (o CANCELADO) ya no puede modificarse
+        if (estadoActual.esFinal()) {
+            throw new RuntimeException(
+                    "El pedido ya se encuentra en estado " + estadoActual + " y no puede modificarse");
+        }
+
+        // Criterio 1: solo los pedidos LISTO pueden pasar a ENTREGADO
+        if (!estadoActual.puedeCambiarA(EstadoPedido.ENTREGADO)) {
+            throw new RuntimeException(
+                    "Solo se pueden entregar pedidos en estado LISTO. Estado actual: " + estadoActual);
+        }
+
+        // 6. Criterio 3: validar el PIN de seguridad enviado al cliente
+        if (pedido.getPinEntrega() == null
+                || !pedido.getPinEntrega().equals(request.getPin())) {
+            throw new RuntimeException("El PIN de seguridad es incorrecto");
+        }
+
+        // 7. Cambiar estado a ENTREGADO y guardar
+        pedido.setEstado(EstadoPedido.ENTREGADO.name());
+        Pedido pedidoGuardado = pedidoRepository.save(pedido);
+
+        // 8. Retornar respuesta
+        return PedidoResponse.builder()
+                .idPedido(pedidoGuardado.getId())
+                .fechaCreacion(pedidoGuardado.getFechaCreacion())
+                .estado(pedidoGuardado.getEstado())
+                .idEmpleadoAsignado(empleado.getId())
+                .mensaje("Pedido entregado exitosamente")
+                .build();
+    }
+
+    // HU-16: Cancelar pedido (solo el cliente dueño y en estado PENDIENTE)
+    @Override
+    @Transactional
+    public PedidoResponse cancelarPedido(Integer idPedido) {
+
+        // 1. Obtener el cliente autenticado
+        Usuario cliente = obtenerUsuarioAutenticado();
+
+        // 2. Validar rol CLIENTE
+        if (cliente.getRol() == null
+                || !"CLIENTE".equalsIgnoreCase(cliente.getRol().getNombre())) {
+            throw new RuntimeException(
+                    "Solo los usuarios con rol CLIENTE pueden cancelar pedidos");
+        }
+
+        // 3. Buscar el pedido
+        Pedido pedido = pedidoRepository.findById(idPedido)
+                .orElseThrow(() -> new RuntimeException(
+                        "El pedido con ID " + idPedido + " no existe"));
+
+        // 4. Validar que el pedido pertenezca al cliente autenticado
+        if (!pedido.getCliente().getId().equals(cliente.getId())) {
+            throw new RuntimeException("No puedes cancelar un pedido que no te pertenece");
+        }
+
+        // 5. Validar la transición de estado (Patrón State)
+        EstadoPedido estadoActual = EstadoPedido.desdeTexto(pedido.getEstado());
+
+        if (estadoActual == EstadoPedido.CANCELADO) {
+            throw new RuntimeException("El pedido ya fue cancelado");
+        }
+
+        // Criterios 1 y 2: solo PENDIENTE puede pasar a CANCELADO
+        if (!estadoActual.puedeCambiarA(EstadoPedido.CANCELADO)) {
+            throw new RuntimeException(
+                    "Lo sentimos, tu pedido ya está en preparación y no puede cancelarse");
+        }
+
+        // 6. Cambiar estado a CANCELADO y guardar
+        pedido.setEstado(EstadoPedido.CANCELADO.name());
+        Pedido pedidoGuardado = pedidoRepository.save(pedido);
+
+        // 7. Retornar respuesta
+        return PedidoResponse.builder()
+                .idPedido(pedidoGuardado.getId())
+                .fechaCreacion(pedidoGuardado.getFechaCreacion())
+                .estado(pedidoGuardado.getEstado())
+                .mensaje("Pedido cancelado exitosamente")
+                .build();
+    }
+
+    // Método de apoyo (HU-15 y HU-16): obtiene el usuario autenticado a partir del token JWT
+    private Usuario obtenerUsuarioAutenticado() {
+        String correo = SecurityContextHolder.getContext()
+                .getAuthentication()
+                .getName();
+
+        return usuarioRepository.findByCorreo(correo)
+                .orElseThrow(() -> new RuntimeException("El usuario autenticado no existe"));
     }
 }
