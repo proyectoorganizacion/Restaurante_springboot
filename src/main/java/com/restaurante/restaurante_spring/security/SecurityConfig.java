@@ -33,6 +33,10 @@ public class SecurityConfig {
                         .requestMatchers("/api/v1/auth/**")
                         .permitAll()
 
+                        // Documentación OpenAPI / Swagger UI (pública, sin token)
+                        .requestMatchers("/swagger-ui.html", "/swagger-ui/**", "/v3/api-docs/**")
+                        .permitAll()
+
                         .requestMatchers("/api/v1/usuarios/cliente")
                         .permitAll()
 
