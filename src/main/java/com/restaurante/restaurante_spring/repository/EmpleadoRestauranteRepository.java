@@ -7,4 +7,7 @@ import org.springframework.stereotype.Repository;
 @Repository
 public interface EmpleadoRestauranteRepository
         extends JpaRepository<EmpleadoRestaurante, Integer> {
+
+    // HU-15: Verifica si el empleado trabaja en el restaurante indicado
+    boolean existsByUsuarioIdAndRestauranteId(Integer idUsuario, Integer idRestaurante);
 }

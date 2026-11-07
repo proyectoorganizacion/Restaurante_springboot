@@ -3,13 +3,14 @@ package com.restaurante.restaurante_spring.controller;
 import com.restaurante.restaurante_spring.dto.request.RestauranteRegisterRequest;
 import com.restaurante.restaurante_spring.dto.response.RestauranteListResponse;
 import com.restaurante.restaurante_spring.service.RestauranteService;
+import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
 import jakarta.validation.Valid;
+
 
 @RestController
 @RequestMapping("/restaurante")
@@ -31,6 +32,16 @@ public class RestauranteController {
             @RequestParam(defaultValue = "10") int tamaño) {
 
         Page<RestauranteListResponse> respuesta = restauranteService.listarRestaurantesPaginados(pagina, tamaño);
+        return ResponseEntity.ok(respuesta);
+    }
+
+
+    // Algoritmo de búsqueda: búsqueda binaria de restaurantes por nombre (prefijo)
+    @GetMapping("/buscar")
+    public ResponseEntity<List<RestauranteListResponse>> buscarRestaurantes(
+            @RequestParam String nombre) {
+
+        List<RestauranteListResponse> respuesta = restauranteService.buscarRestaurantesPorNombre(nombre);
         return ResponseEntity.ok(respuesta);
     }
 }

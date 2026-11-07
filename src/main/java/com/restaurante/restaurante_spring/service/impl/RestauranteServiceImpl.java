@@ -7,12 +7,17 @@ import com.restaurante.restaurante_spring.entity.Usuario;
 import com.restaurante.restaurante_spring.repository.RestauranteRepository;
 import com.restaurante.restaurante_spring.repository.UsuarioRepository;
 import com.restaurante.restaurante_spring.service.RestauranteService;
+import com.restaurante.restaurante_spring.util.BusquedaBinaria;
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.List;
 import org.jspecify.annotations.NonNull;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+
 
 @Service
 public class RestauranteServiceImpl implements RestauranteService {
@@ -61,5 +66,30 @@ public class RestauranteServiceImpl implements RestauranteService {
                 restaurante.getNombre(),
                 restaurante.getUrl_logo()
         ));
+    }
+
+    // Algoritmo de búsqueda: búsqueda binaria de restaurantes por nombre (prefijo)
+    @Override
+    public List<RestauranteListResponse> buscarRestaurantesPorNombre(String nombre) {
+        // 1. Validar que se haya enviado un texto a buscar
+        if (nombre == null || nombre.isBlank()) {
+            throw new IllegalArgumentException("Debes escribir el nombre del restaurante a buscar");
+        }
+
+        // 2. Ordenar en Java con la MISMA normalización que usa la búsqueda binaria
+        //    (MySQL ordena distinto a Java con mayúsculas y tildes, por eso no usamos su orden)
+        List<Restaurante> ordenados = new ArrayList<>(restauranteRepository.findAll());
+        ordenados.sort(Comparator.comparing(
+                (Restaurante r) -> BusquedaBinaria.normalizar(r.getNombre())));
+
+        // 3. Aplicar la búsqueda binaria
+        List<Restaurante> encontrados = BusquedaBinaria.buscarPorPrefijo(ordenados, nombre);
+
+        // 4. Convertir a DTO de respuesta (el mismo que usa la HU-9)
+        return encontrados.stream()
+                .map(restaurante -> new RestauranteListResponse(
+                        restaurante.getNombre(),
+                        restaurante.getUrl_logo()))
+                .toList();
     }
 }
