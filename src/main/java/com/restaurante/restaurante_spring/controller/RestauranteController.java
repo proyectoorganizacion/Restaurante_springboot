@@ -4,6 +4,10 @@ import com.restaurante.restaurante_spring.dto.request.RestauranteRegisterRequest
 import com.restaurante.restaurante_spring.dto.response.RestauranteListResponse;
 import com.restaurante.restaurante_spring.service.RestauranteService;
 import java.util.List;
+
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
@@ -26,6 +30,9 @@ public class RestauranteController {
     }
 
     // Endpoint agregado para la HU-9
+    @Operation(
+            summary = "HU-9: Listar restaurantes",
+            description = "Lista paginada de restaurantes ordenada alfabéticamente por nombre. Devuelve nombre y logo.")
     @GetMapping("/listar")
     public ResponseEntity<Page<RestauranteListResponse>> listarRestaurantes(
             @RequestParam(defaultValue = "0") int pagina,
@@ -37,6 +44,15 @@ public class RestauranteController {
 
 
     // Algoritmo de búsqueda: búsqueda binaria de restaurantes por nombre (prefijo)
+    @Operation(
+            summary = "Buscar restaurantes por nombre (búsqueda binaria)",
+            description = "Devuelve los restaurantes cuyo nombre EMPIEZA por el texto enviado, sin distinguir "
+                    + "mayúsculas ni tildes. Ejemplo: nombre=piz encuentra 'Pizzería Roma'. Usa búsqueda binaria O(log n).")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Lista de coincidencias (vacía si no hay ninguna)"),
+            @ApiResponse(responseCode = "400", description = "El parámetro nombre está vacío"),
+            @ApiResponse(responseCode = "401", description = "Falta el token JWT o es inválido")
+    })
     @GetMapping("/buscar")
     public ResponseEntity<List<RestauranteListResponse>> buscarRestaurantes(
             @RequestParam String nombre) {
