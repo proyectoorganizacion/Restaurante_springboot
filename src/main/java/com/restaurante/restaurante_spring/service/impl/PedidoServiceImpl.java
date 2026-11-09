@@ -25,11 +25,16 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import com.restaurante.restaurante_spring.entity.TrazabilidadPedido;
+import com.restaurante.restaurante_spring.repository.TrazabilidadPedidoRepository;
+import com.restaurante.restaurante_spring.dto.response.TrazabilidadPedidoResponse;
+
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+
 
 @Service
 @RequiredArgsConstructor
@@ -41,6 +46,7 @@ public class PedidoServiceImpl implements PedidoService {
     private final UsuarioRepository usuarioRepository;
     private final SmsService smsService;
     private final EmpleadoRestauranteRepository empleadoRestauranteRepository;
+    private final TrazabilidadPedidoRepository trazabilidadPedidoRepository;
 
     @Override
     public PedidoResponse crearPedido(PedidoRequest request) {
@@ -99,6 +105,14 @@ public class PedidoServiceImpl implements PedidoService {
 
         // 7. Guardar en BD. Al guardar 'pedido', el CascadeType.ALL guarda automáticamente los detalles.
         Pedido pedidoGuardado = pedidoRepository.save(pedido);
+
+        // Registrar la creación del pedido en la trazabilidad
+        registrarCambioEstado(
+                pedidoGuardado,
+                null,
+                "PENDIENTE",
+                cliente
+        );
 
         // 8. Retornar respuesta exitosa
         return PedidoResponse.builder()
@@ -178,18 +192,30 @@ public class PedidoServiceImpl implements PedidoService {
 
         pedido.setPinEntrega(pinGenerado);
 
-        // 6. Cambiar estado a LISTO
+        // 6. Guardar el estado anterior
+        String estadoAnterior = pedido.getEstado();
+
+        // 7. Cambiar estado a LISTO
         pedido.setEstado("LISTO");
 
+        // 8. Registrar la trazabilidad
+        registrarCambioEstado(
+                pedido,
+                estadoAnterior,
+                pedido.getEstado(),
+                empleado
+        );
+
+        // 9. Guardar el pedido
         Pedido pedidoGuardado = pedidoRepository.save(pedido);
 
-        // 7. Notificar al cliente mediante Twilio
+        // 10. Notificar al cliente mediante Twilio
         String telefonoCliente = pedido.getCliente().getCelular();
         String mensajeSms = "sms_order_confirmation";
 
         smsService.enviarSms(telefonoCliente, mensajeSms);
 
-        // 8. Retornar respuesta
+        // 11. Retornar respuesta
         return PedidoResponse.builder()
                 .idPedido(pedidoGuardado.getId())
                 .fechaCreacion(pedidoGuardado.getFechaCreacion())
@@ -235,13 +261,24 @@ public class PedidoServiceImpl implements PedidoService {
                     "Solo se pueden asignar pedidos que estén en estado PENDIENTE");
         }
 
-        // 5. Asignar empleado y cambiar estado
+        // 5. Guardar el estado anterior
+        String estadoAnterior = pedido.getEstado();
+
+        // 6. Asignar empleado y cambiar estado
         pedido.setEmpleadoAsignado(empleado);
         pedido.setEstado("EN_PREPARACION");
 
-        Pedido pedidoGuardado = pedidoRepository.save(pedido);
+        // 7. Registrar la trazabilidad
+        registrarCambioEstado(
+                pedido,
+                estadoAnterior,
+                pedido.getEstado(),
+                empleado
+        );
 
-        // 6. Retornar respuesta
+        // 8. Guardar el pedido
+        Pedido pedidoGuardado = pedidoRepository.save(pedido);
+        // 9. Retornar respuesta
         return PedidoResponse.builder()
                 .idPedido(pedidoGuardado.getId())
                 .fechaCreacion(pedidoGuardado.getFechaCreacion())
@@ -302,11 +339,24 @@ public class PedidoServiceImpl implements PedidoService {
             throw new RuntimeException("El PIN de seguridad es incorrecto");
         }
 
-        // 7. Cambiar estado a ENTREGADO y guardar
+        // 7. Guardar el estado anterior
+        String estadoAnterior = pedido.getEstado();
+
+        // 8. Cambiar estado a ENTREGADO
         pedido.setEstado(EstadoPedido.ENTREGADO.name());
+
+        // 9. Registrar la trazabilidad
+        registrarCambioEstado(
+                pedido,
+                estadoAnterior,
+                pedido.getEstado(),
+                empleado
+        );
+
+        // 10. Guardar el pedido
         Pedido pedidoGuardado = pedidoRepository.save(pedido);
 
-        // 8. Retornar respuesta
+        // 11. Retornar respuesta
         return PedidoResponse.builder()
                 .idPedido(pedidoGuardado.getId())
                 .fechaCreacion(pedidoGuardado.getFechaCreacion())
@@ -354,11 +404,24 @@ public class PedidoServiceImpl implements PedidoService {
                     "Lo sentimos, tu pedido ya está en preparación y no puede cancelarse");
         }
 
-        // 6. Cambiar estado a CANCELADO y guardar
+        // 6. Guardar el estado anterior
+        String estadoAnterior = pedido.getEstado();
+
+        // 7. Cambiar estado a CANCELADO
         pedido.setEstado(EstadoPedido.CANCELADO.name());
+
+        // 8. Registrar la trazabilidad
+        registrarCambioEstado(
+                pedido,
+                estadoAnterior,
+                pedido.getEstado(),
+                cliente
+        );
+
+        // 9. Guardar el pedido
         Pedido pedidoGuardado = pedidoRepository.save(pedido);
 
-        // 7. Retornar respuesta
+        // 10. Retornar respuesta
         return PedidoResponse.builder()
                 .idPedido(pedidoGuardado.getId())
                 .fechaCreacion(pedidoGuardado.getFechaCreacion())
@@ -376,4 +439,61 @@ public class PedidoServiceImpl implements PedidoService {
         return usuarioRepository.findByCorreo(correo)
                 .orElseThrow(() -> new RuntimeException("El usuario autenticado no existe"));
     }
+
+    private void registrarCambioEstado(
+            Pedido pedido,
+            String estadoAnterior,
+            String estadoNuevo,
+            Usuario usuarioCambio) {
+
+        TrazabilidadPedido trazabilidad = TrazabilidadPedido.builder()
+                .pedido(pedido)
+                .estadoAnterior(estadoAnterior)
+                .estadoNuevo(estadoNuevo)
+                .fechaCambio(LocalDateTime.now())
+                .usuarioCambio(usuarioCambio)
+                .build();
+
+        trazabilidadPedidoRepository.save(trazabilidad);
+    }
+
+
+    // HU-17: Consultar la trazabilidad de un pedido
+    @Override
+    @Transactional(readOnly = true)
+    public List<TrazabilidadPedidoResponse> consultarTrazabilidadPedido(Integer idPedido) {
+
+        Usuario cliente = obtenerUsuarioAutenticado();
+
+        if (cliente.getRol() == null
+                || !"CLIENTE".equalsIgnoreCase(cliente.getRol().getNombre())) {
+            throw new RuntimeException(
+                    "Solo los usuarios con rol CLIENTE pueden consultar la trazabilidad");
+        }
+
+
+        Pedido pedido = pedidoRepository.findById(idPedido)
+                .orElseThrow(() -> new RuntimeException(
+                        "El pedido con ID " + idPedido + " no existe"));
+
+        if (!pedido.getCliente().getId().equals(cliente.getId())) {
+            throw new RuntimeException(
+                    "No puedes consultar la trazabilidad de un pedido que no te pertenece");
+        }
+
+        return trazabilidadPedidoRepository
+                .findByPedido_IdAndPedido_Cliente_IdOrderByFechaCambioAsc(
+                        idPedido, cliente.getId())
+                .stream()
+                .map(registro -> TrazabilidadPedidoResponse.builder()
+                        .idPedido(registro.getPedido().getId())
+                        .estadoAnterior(registro.getEstadoAnterior())
+                        .estadoNuevo(registro.getEstadoNuevo())
+                        .fechaCambio(registro.getFechaCambio())
+                        .nombreUsuarioCambio(
+                                registro.getUsuarioCambio().getNombre())
+                        .build())
+                .toList();
+    }
+
 }

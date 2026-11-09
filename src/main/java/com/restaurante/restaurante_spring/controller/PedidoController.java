@@ -3,6 +3,7 @@ package com.restaurante.restaurante_spring.controller;
 import com.restaurante.restaurante_spring.dto.request.EntregarPedidoRequest;
 import com.restaurante.restaurante_spring.dto.request.PedidoRequest;
 import com.restaurante.restaurante_spring.dto.response.PedidoResponse;
+import com.restaurante.restaurante_spring.dto.response.TrazabilidadPedidoResponse;
 import com.restaurante.restaurante_spring.service.PedidoService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -13,6 +14,8 @@ import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 
 
@@ -107,5 +110,16 @@ public class PedidoController {
                 pedidoService.cancelarPedido(id);
 
         return ResponseEntity.ok(response);
+    }
+
+    // HU-17: Consultar la trazabilidad de un pedido
+    @GetMapping("/{id}/trazabilidad")
+    public ResponseEntity<List<TrazabilidadPedidoResponse>> consultarTrazabilidadPedido(
+            @PathVariable Integer id) {
+
+        List<TrazabilidadPedidoResponse> historial =
+                pedidoService.consultarTrazabilidadPedido(id);
+
+        return ResponseEntity.ok(historial);
     }
 }
