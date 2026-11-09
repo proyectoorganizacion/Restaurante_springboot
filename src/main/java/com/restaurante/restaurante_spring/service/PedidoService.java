@@ -5,6 +5,9 @@ import com.restaurante.restaurante_spring.dto.request.PedidoRequest;
 import com.restaurante.restaurante_spring.dto.response.PedidoResponse;
 import org.springframework.data.domain.Page;
 
+import com.restaurante.restaurante_spring.dto.response.TrazabilidadPedidoResponse;
+import java.util.List;
+
 public interface PedidoService {
     PedidoResponse crearPedido(PedidoRequest request);
     // HU-12: Obtener lista de pedidos filtrando por estado con paginación
@@ -18,4 +21,7 @@ public interface PedidoService {
 
     // HU-16: Cancelar pedido (solo el cliente dueño y en estado PENDIENTE)
     PedidoResponse cancelarPedido(Integer idPedido);
+
+    // HU-17: Consultar el historial de un pedido
+    List<TrazabilidadPedidoResponse> consultarTrazabilidadPedido(Integer idPedido);
 }
